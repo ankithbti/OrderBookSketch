@@ -26,7 +26,9 @@ namespace obLib{
     OrderBookManagerImproved _orderBookManager;
     std::shared_ptr<spdlog::logger> _logger;
 
-    Subscriber(boost::asio::io_service& io, const std::string& host, const std::string& port) : _socket(io), _resolver(io), _orderBookManager(), _logger(spdlog::daily_logger_st("Subscriberlogger", "logs/SubscriberLog")){
+    Subscriber(boost::asio::io_service& io, const std::string& host, const std::string& port) : _socket(io),
+    		_resolver(io), _orderBookManager(),
+    		_logger(spdlog::daily_logger_st("Subscriberlogger", "logs/SubscriberLog")){
       connect(host, port);
       pcount = 0;
     }

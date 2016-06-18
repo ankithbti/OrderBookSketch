@@ -28,8 +28,6 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
-
-
 namespace obLib{
 
 #define LOG(m) \
