@@ -17,6 +17,7 @@ OBJS = $(patsubst %.cpp, %.o, $(SRCS))
 MAIN_OBJ = $(patsubst %.cpp, %.o, $(MAIN_SRC))
 
 INCS = -I../include \
+	   -I../../Common/include \
        -I$(BOOST_BASE)/include \
 
 LIBS = \
