@@ -27,6 +27,7 @@ LIBS = \
         -L$(BOOST_BASE)/lib -lboost_system \
         -L$(BOOST_BASE)/lib -lboost_iostreams \
         -L$(BOOST_BASE)/lib -lboost_chrono \
+        -L$(BOOST_BASE)/lib -lboost_date_time \
         -L$(BOOST_BASE)/lib -lboost_regex \
 		-lpthread
 

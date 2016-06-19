@@ -1,4 +1,5 @@
 #include <Subscriber.hpp>
+#include <TimeUtil.hpp>
 
 using namespace obLib;
 
@@ -24,6 +25,7 @@ struct Sub{
 
 int main(int argc, char ** argv)
 {
+
 	if(argc < 3)
 	{
 		std::cout << " main() - Usage: " << argv[0] << " <Host> <Port>" << std::endl;

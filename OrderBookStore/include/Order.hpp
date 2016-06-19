@@ -37,6 +37,9 @@ namespace obLib
     virtual Quantity order_qty() const = 0;
     virtual void order_qty(Quantity q) = 0;
 
+    virtual int64_t getTimeStmap() const = 0;
+
+
     virtual ~Order(){
 
     }
@@ -72,6 +75,10 @@ namespace obLib
     void print() const{
       std::cout << " SimpleMessage - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
 	  << " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
+    }
+
+    virtual int64_t getTimeStmap() const{
+    	return _timestamp;
     }
 
     virtual OrderId orderId() const{

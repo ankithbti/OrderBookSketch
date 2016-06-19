@@ -27,21 +27,23 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/variant.hpp>
 
 namespace obLib{
 
 #define LOG(m) \
     std::cout << m << std::endl
 
-  using Price = int32_t;
-  using Quantity = int32_t;
-  using OrderId = int64_t;
-  using ChangeId = int32_t;
-  using TokenId = int32_t;
+using Price = int32_t;
+using Quantity = int32_t;
+using OrderId = int64_t;
+using ChangeId = int32_t;
+using TokenId = int32_t;
 
-  const Price INVALID_LEVEL_PRICE(0);
-  const Price PRICE_UNCHANGED(0);
-  const int32_t SIZE_UNCHANGED(0);
+const Price INVALID_LEVEL_PRICE(0);
+const Price PRICE_UNCHANGED(0);
+const int32_t SIZE_UNCHANGED(0);
 
 }
 

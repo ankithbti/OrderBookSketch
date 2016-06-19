@@ -14,15 +14,13 @@ namespace obLib
 {
 
 #pragma pack(push, 1) // For memory alignment
-  struct MktDataGlobalHeaderMsg
-  {
-    int16_t _len;
-    int16_t _streamId;
-    int32_t _seqNo; // will be 0 in case of HB message
-  };
+struct MktDataGlobalHeaderMsg
+{
+	int16_t _len;
+	int16_t _streamId;
+	int32_t _seqNo; // will be 0 in case of HB message
+};
 }
 #pragma pack(pop)
-
-
 
 #endif /* INCLUDE_MKTDATAGLOBALHEADERMSG_HPP_ */

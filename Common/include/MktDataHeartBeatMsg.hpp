@@ -14,12 +14,12 @@
 namespace obLib{
 
 #pragma pack(push, 1) // For memory alignment
-  struct MktDataHBMsg
-  {
-    MktDataGlobalHeaderMsg _globalMktDataHeader; // Header will have 0 SeqNo in HB case
-    char _msgType; // 'Z'
-    int32_t _lastSeqNo; // Last sent data sequence no. of the Stream
-  };
+struct MktDataHBMsg
+{
+	MktDataGlobalHeaderMsg _globalMktDataHeader; // Header will have 0 SeqNo in HB case
+	char _msgType; // 'Z'
+	int32_t _lastSeqNo; // Last sent data sequence no. of the Stream
+};
 #pragma pack(pop)
 
 }

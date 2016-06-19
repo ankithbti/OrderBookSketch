@@ -10,6 +10,7 @@
 
 #include <Common.hpp>
 #include <Order.hpp>
+#include <Trade.hpp>
 
 namespace obLib{
 
@@ -21,6 +22,7 @@ namespace obLib{
     typedef std::multimap<Price, Order::SharedPtr, std::greater<Price> > BidsMap;
     typedef std::multimap<Price, Order::SharedPtr, std::less<Price> > AsksMap;
     typedef std::multimap<Price, Order::SharedPtr>::iterator MapIt;
+    typedef std::multimap<Price, Order::SharedPtr>::const_iterator MapConstIt;
 
     typedef std::unordered_map<OrderId, MapIt> BidsHashMap;
     typedef std::unordered_map<OrderId, MapIt> AsksHashMap;
@@ -44,48 +46,8 @@ namespace obLib{
     }
 
     void processOrder(Order::SharedPtr orderPtr);
-
-    void printTop5(std::string& str){
-      if(_bids.size() == 0 && _asks.size() == 0){
-	  return;
-      }
-      std::stringstream obStr;
-      obStr << _token << " : [ " ;
-      int count = 0;
-      obStr << " Bids { " ;
-      for(MapIt it = _bids.begin() ; it != _bids.end(); it = _bids.upper_bound(it->first)){
-	  std::pair<MapIt, MapIt> eqRangeIt = _bids.equal_range(it->first);
-	  Quantity aggQuantity = 0;
-	  for(MapIt si = eqRangeIt.first ; si != eqRangeIt.second ; ++si){
-	      aggQuantity += si->second->order_qty();
-	  }
-	  obStr << it->first << "|" << aggQuantity ;
-	  if(++count == 5){
-	      break;
-	  }else{
-	      obStr << ", ";
-	  }
-      }
-      obStr << " } ";
-      obStr << " <--> Asks { ";
-      count = 0;
-      for(MapIt it = _asks.begin() ; it != _asks.end(); it = _asks.upper_bound(it->first)){
-	  std::pair<MapIt, MapIt> eqRangeIt = _asks.equal_range(it->first);
-	  Quantity aggQuantity = 0;
-	  for(MapIt si = eqRangeIt.first ; si != eqRangeIt.second ; ++si){
-	      aggQuantity += si->second->order_qty();
-	  }
-	  obStr << it->first << "|" << aggQuantity ;
-	  if(++count == 5){
-	      break;
-	  }else{
-	      obStr << ", ";
-	  }
-      }
-      obStr << " } ";
-      obStr << " ] " ;
-      str = obStr.str();
-    }
+    void processTrade(Trade::SharedPtr tradePtr);
+    void printTop5(std::string& str) const;
 
   };
 

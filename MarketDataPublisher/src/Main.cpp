@@ -7,14 +7,16 @@ using namespace obLib;
 struct Pub{
 	size_t _port;
 	std::string _filePath;
+	bool _runForSingleSec;
 
-	Pub(size_t port, const std::string& file) : _port(port), _filePath(file){
+	Pub(size_t port, const std::string& file, bool runForSingleSec = false) : _port(port), _filePath(file),
+			_runForSingleSec(runForSingleSec){
 	}
 
   void run(){
 	try{
     boost::asio::io_service io;
-    Publisher pub(io, _port, _filePath);
+    Publisher pub(io, _port, _filePath, _runForSingleSec);
     io.run();
 	}catch(const std::runtime_error& err)
 	{
@@ -25,9 +27,9 @@ struct Pub{
 
 int main(int argc, char** argv)
 {
-	if(argc < 3)
+	if(argc < 4)
 	{
-		std::cout << " main() - Usage: " << argv[0] << " <Port> <UdpHexPacketFile>" << std::endl;
+		std::cout << " main() - Usage: " << argv[0] << " <Port> <UdpHexPacketFile> <1/0 - runForSingleSec/No>" << std::endl;
 		return 1;
 	}
 	try{
@@ -37,7 +39,7 @@ int main(int argc, char** argv)
 			return 2;
 		}
 
-  		Pub p(boost::lexical_cast<size_t>(argv[1]), argv[2]);
+  		Pub p(boost::lexical_cast<size_t>(argv[1]), argv[2], boost::lexical_cast<bool>(argv[3]));
   		std::thread t1(std::bind(&Pub::run, p));
   		t1.join();	
 	}catch(const boost::bad_lexical_cast& err){

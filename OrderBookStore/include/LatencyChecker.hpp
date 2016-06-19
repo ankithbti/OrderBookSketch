@@ -23,7 +23,7 @@ namespace obLib{
     static long _minlatency;
     static std::vector<size_t> _latencies;
 
-    static std::shared_ptr<spdlog::logger> _logger;
+//    static std::shared_ptr<spdlog::logger> _logger;
 
     LatencyChecker() : _startTime(Clock::now()){
       _latencies.reserve(200000);
@@ -39,7 +39,7 @@ namespace obLib{
 	  _maxLatency = latency;
       }
       //_averageLatency += latency;
-      _logger->info() << "Curr Stats : " <<  latency << " ns" << " Min: " << _minlatency << " Max: " << _maxLatency << " Average: " << getAverageLatency();
+      //_logger->info() << "Curr Stats : " <<  latency << " ns" << " Min: " << _minlatency << " Max: " << _maxLatency << " Average: " << getAverageLatency();
     }
 
     static size_t getMin()
@@ -82,9 +82,9 @@ namespace obLib{
       int count = 0;
 	  std::sort(_latencies.begin(), _latencies.end(), std::less<size_t>());
       for(auto& i : _latencies){
-	  _logger->info() << "Index: " << ++count << " - Latency: " << i;
+    	  //_logger->info() << "Index: " << ++count << " - Latency: " << i;
       }
-      _logger->info() << " Latency Size: " << _latencies.size();
+      //_logger->info() << " Latency Size: " << _latencies.size();
     }
 
   };
@@ -104,8 +104,8 @@ namespace obLib{
   template<typename Clock>
   std::vector<size_t> LatencyChecker<Clock>::_latencies ;
 
-  template<typename Clock>
-  std::shared_ptr<spdlog::logger> LatencyChecker<Clock>::_logger = spdlog::daily_logger_mt("LatencyLogger", "logs/LatencyLogger");
+//  template<typename Clock>
+//  std::shared_ptr<spdlog::logger> LatencyChecker<Clock>::_logger = spdlog::daily_logger_mt("LatencyLogger", "logs/LatencyLogger");
 }
 
 
