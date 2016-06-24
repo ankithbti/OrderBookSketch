@@ -20,6 +20,7 @@ struct Trade
 	//    typedef std::shared_ptr<Order> SharedPtr;
 	typedef Trade* SharedPtr;
 
+	virtual SeqNo getSeqNo() const = 0;
 	virtual char getType() const = 0;
 
 	virtual int64_t getTimeStmap() const = 0;
@@ -71,6 +72,10 @@ struct SimpleTrade : public Trade{
 				<< " Body: [ " << _msgType << " " << _timestamp << " " << _buyOrderId << " " << _sellOrderId << " " << _toeknNo << " " << _price << " " << _qty << " ] " << std::endl;
 	}
 
+	virtual SeqNo getSeqNo() const
+	{
+		return _globalMktDataHeader._seqNo;
+	}
 	virtual int64_t getTimeStmap() const{
 		return _timestamp;
 	}

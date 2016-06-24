@@ -9,12 +9,11 @@
 #define INCLUDE_ORDERBOOKIMPROVED_HPP_
 
 #include <Common.hpp>
-#include <Order.hpp>
-#include <Trade.hpp>
+#include <OrderBookBase.hpp>
 
 namespace obLib{
 
-  struct OrderBookImproved : private boost::noncopyable
+  struct OrderBookImproved
   {
 
     typedef std::shared_ptr<OrderBookImproved> SharedPtr;

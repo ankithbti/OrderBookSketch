@@ -33,9 +33,9 @@ struct MktDataOrderMsg
 
 	void toString(std::string& str){
 		std::stringstream ss;
-		ss << " Message - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+		ss << " , Message - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
 				<< " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " ;
-		str = ss.str();
+		str += ss.str();
 	}
 };
 #pragma pack(pop)

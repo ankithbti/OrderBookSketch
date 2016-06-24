@@ -19,9 +19,12 @@ namespace obLib
 //    typedef std::shared_ptr<Order> SharedPtr;
     typedef Order* SharedPtr;
 
+
     bool is_limit() const{
       return price() > 0;
     }
+
+    virtual SeqNo getSeqNo() const = 0;
 
     virtual OrderId orderId() const = 0;
 
@@ -33,6 +36,7 @@ namespace obLib
     virtual bool is_buy() const = 0;
 
     virtual Price price() const = 0;
+    virtual void price(Price p) = 0;
 
     virtual Quantity order_qty() const = 0;
     virtual void order_qty(Quantity q) = 0;
@@ -77,6 +81,10 @@ namespace obLib
 	  << " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
     }
 
+    virtual SeqNo getSeqNo() const{
+    	return _globalMktDataHeader._seqNo;
+    }
+
     virtual int64_t getTimeStmap() const{
     	return _timestamp;
     }
@@ -102,6 +110,10 @@ namespace obLib
 
     virtual Price price() const {
       return _price;
+    }
+
+    virtual void price(Price p){
+    	_price = p;
     }
 
     virtual Quantity order_qty() const{

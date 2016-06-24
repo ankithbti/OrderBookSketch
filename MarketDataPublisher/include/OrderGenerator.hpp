@@ -54,7 +54,6 @@ struct OrderGenerator{
 	std::vector<MktDataOrderMsg*> _orders;
 	std::set<int32_t> _tokens;
 	MktDataContainer _mktDataContainer;
-	//std::shared_ptr<spdlog::logger> _logger;
 
 	const std::set<int32_t>& getTokens() const {
 		return _tokens;
@@ -74,30 +73,6 @@ struct OrderGenerator{
 
 	~OrderGenerator(){
 
-		//_logger->info() << " Total Seq: " << _mktDataContainer.size() ;
-		for(MktDataContainer::value_type& v : _mktDataContainer){
-			switch(v.second.first){
-			case 'N':
-			case 'M':
-			case 'X':
-			{
-				std::string str;
-				(boost::get<MktDataOrderMsg*>(v.second.second))->toString(str);
-				//_logger->info() << v.first << " <-> " << v.second.first << " | " << str ;
-			}
-			break;
-			case 'T':
-			{
-				std::string str;
-				(boost::get<MktDataTradeMsg*>(v.second.second))->toString(str);
-				//_logger->info() << v.first << " <-> " << v.second.first << " | " << str ;
-			}
-			break;
-			default:
-				break;
-			}
-		}
-
 		for(auto msg: _orders){
 			delete msg;
 		}
@@ -107,8 +82,7 @@ struct OrderGenerator{
 
 	}
 
-	OrderGenerator(const std::string& str) {
-//		_logger(spdlog::daily_logger_st("OrderGenerator", "logs/OrderGenerator")){
+	OrderGenerator(const std::string& str){
 		std::ifstream in(str.c_str(), std::ios::in|std::ios::binary);
 		if(in.good()){
 			std::cout << " File is readable." << std::endl;
@@ -159,6 +133,7 @@ struct OrderGenerator{
 						_orders.push_back(mom);
 						_mktDataContainer.emplace(mom->_globalMktDataHeader._seqNo, std::make_pair(mom->_msgType, mom));
 						_tokens.insert(mom->_toeknNo);
+
 					}
 					break;
 					case 'T':
@@ -170,6 +145,7 @@ struct OrderGenerator{
 						_trades.push_back(mtm);
 						_mktDataContainer.emplace(mtm->_globalMktDataHeader._seqNo, std::make_pair(mtm->_msgType, mtm));
 						_tokens.insert(mtm->_toeknNo);
+
 					}
 					break;
 					case 'G':

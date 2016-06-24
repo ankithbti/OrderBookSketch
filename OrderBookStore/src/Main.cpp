@@ -1,5 +1,8 @@
 #include <Subscriber.hpp>
 #include <TimeUtil.hpp>
+#include <HashMap.h>
+#include <logger/Logger.hpp>
+#include <logger/LogPolicy.hpp>
 
 using namespace obLib;
 
@@ -21,7 +24,6 @@ struct Sub{
 		}
 	}
 };
-
 
 int main(int argc, char ** argv)
 {

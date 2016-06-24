@@ -67,14 +67,18 @@ private:
 			case 'M':
 			case 'X':
 			{
-				memcpy((void*)data,(void*)(boost::get<MktDataOrderMsg*>(v.second.second)), sizeof(MktDataOrderMsg));
 				try{
 					if(_runForSingleSec){
 						if((boost::get<MktDataOrderMsg*>(v.second.second))->_toeknNo == 47958){
+							memcpy((void*)data,(void*)(boost::get<MktDataOrderMsg*>(v.second.second)), sizeof(MktDataOrderMsg));
 							doWrite(data, sizeof(MktDataOrderMsg));
-							std::cout << " Writing Order: " << ++count << std::endl;
+							std::string str;
+							(boost::get<MktDataOrderMsg*>(v.second.second))->toString(str);
+							std::cout << " Packet#: " << ++count << " " << str << std::endl;
+
 						}
 					}else{
+						memcpy((void*)data,(void*)(boost::get<MktDataOrderMsg*>(v.second.second)), sizeof(MktDataOrderMsg));
 						doWrite(data, sizeof(MktDataOrderMsg));
 						std::cout << " Writing Order: " << ++count << std::endl;
 					}
@@ -99,8 +103,10 @@ private:
 				break;
 			}
 			delete [] data;
-			//boost::this_thread::sleep(boost::posix_time::microseconds(10));
+			boost::this_thread::sleep(boost::posix_time::microseconds(5));
 		}
+		std::cout << " Waiting for 5 mins. " << std::endl;
+		boost::this_thread::sleep(boost::posix_time::seconds(5*60));
 		delete og;
 	}
 };

@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <pthread.h>
+#include <fstream>
 
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
@@ -29,6 +30,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/variant.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/intrusive/list.hpp>
+#include <boost/foreach.hpp>
 
 namespace obLib{
 
@@ -40,10 +44,20 @@ using Quantity = int32_t;
 using OrderId = int64_t;
 using ChangeId = int32_t;
 using TokenId = int32_t;
+using SeqNo = int32_t;
 
 const Price INVALID_LEVEL_PRICE(0);
 const Price PRICE_UNCHANGED(0);
 const int32_t SIZE_UNCHANGED(0);
+
+#define WMB() __asm__ __volatile__ ("" : : : "memory")
+#define PAUSE() __asm__ __volatile__ ("rep; nop" : : : "memory")
+#define INTEL_CACHE_LINE 64
+
+static inline int xchg(volatile int *ptr, int x){
+	__asm__("xchgl %0,%1" : "=r" (x) : "m" (*(ptr)), "0" (x) : "memory");
+	return x;
+}
 
 }
 

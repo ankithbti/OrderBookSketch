@@ -11,37 +11,174 @@
 #include <Common.hpp>
 #include <OrderBook.hpp>
 #include <OrderBookImproved.hpp>
+#include <OrderBookType2.hpp>
 #include <OrderGenerator.hpp>
 #include <spdlog/spdlog.h>
-#include <Trade.hpp>
+#include <HashMap.h>
+#include <FastBuffer.hpp>
 
 namespace obLib{
 
-struct OrderBookManagerImproved : private boost::noncopyable
-{
-	typedef std::unordered_map<TokenId, OrderBookImproved::SharedPtr> OrderBookContainer;
+// CRTP
+template<class T>
+struct OrderBookManagerBase : private boost::noncopyable{
+
+	typedef std::unordered_map<TokenId, OrderBookImproved > OrderBookContainer;
 	typedef std::unordered_map<TokenId, int> SecurityFrequencyCont;
-
 	typedef OrderBookContainer::iterator OrderBookContainerIt;
-
 	OrderBookContainer _orderBooks;
-	std::shared_ptr<spdlog::logger> _logger;
-	//SecurityFrequencyCont _freq;
 
-	OrderBookManagerImproved() : _logger(spdlog::daily_logger_mt("OrderBookManagerImproved", "logs/OrderBook")){
+	typedef std::unordered_map<TokenId, OrderBookImproved > OrderBookContainerOld;
+	OrderBookContainerOld _orderBooksOld;
+
+	void init(){
+		static_cast<T*>(this)->init();
+	}
+
+	void addOrder(Order::SharedPtr order){
+		static_cast<T*>(this)->addOrder(order);
+	}
+	void addTrade(Trade::SharedPtr trade){
+		static_cast<T*>(this)->addTrade(trade);
+	}
+
+	void print(){
+		static_cast<T*>(this)->print();
+	}
+};
+
+struct OrderBookManagerTemp : public OrderBookManagerBase<OrderBookManagerTemp>{
+
+	int _state;
+	void init(){
+		_state = 100;
+	}
+	void addOrder(Order::SharedPtr order) {
+		std::cout << _state << std::endl;
+	}
+	void addTrade(Trade::SharedPtr trade) {
+
+	}
+	void orderBookStr(std::string& str){
+
+	}
+};
+
+struct OrderBookType2CB{
+	void operator()(OrderBookType2* b, bool isBBOUpdated){
+
+	}
+};
+
+template <typename Callback>
+struct OrderBookManagerType2{
+public:
+	static constexpr int16_t NOBOOK = std::numeric_limits<int16_t>::max();
+	static constexpr int16_t MAXBOOK = std::numeric_limits<int16_t>::max();
+	static constexpr int16_t MAXSECURITIES = std::numeric_limits<int16_t>::max();
+private:
+	struct Hash {
+		size_t operator()(uint64_t h) const noexcept {
+			h ^= h >> 33;
+			h *= 0xff51afd7ed558ccd;
+			h ^= h >> 33;
+			h *= 0xc4ceb9fe1a85ec53;
+			h ^= h >> 33;
+			return h;
+		}
+	};
+
+	Callback& _callback;
+	size_t _sizeHint;
+	bool _all_orders = false;
+	bool _all_books = false;
+
+
+	std::vector<OrderBookType2> _books;
+	HashMap<TokenId, uint16_t, Hash> _symbols; // Value of map gives the index of OrderBook in books_
+
+public:
+
+	OrderBookManagerType2(Callback& cb, size_t sizeHint, bool all_orders = false, bool all_books = false) :
+		_callback(cb),
+		_sizeHint(sizeHint),
+		_all_orders(all_orders),
+		_all_books(all_books),
+		_symbols(MAXSECURITIES, 0){
+		_books.reserve(MAXSECURITIES);
+	}
+
+	void init(){
 		OrderGenerator og;
 		for(auto token : og.getTokens()){
-			OrderBookImproved::SharedPtr obi(new OrderBookImproved(token));
-			std::pair<TokenId, OrderBookImproved::SharedPtr> p = std::make_pair(token, obi);
-			//_logger->info() << "Creating OrderBook for Token: " << token ;
-			_orderBooks.insert(p);
+			subscribe(token);
+			//OrderBookImproved ob(token);
+			//_orderBooks.emplace(token, ob);
 		}
 	}
 
-	std::shared_ptr<spdlog::logger> getLogger(){
-		return _logger;
+	OrderBookType2& subscribe(TokenId instrument, void *data = NULL) {
+		auto it = _symbols.find(instrument);
+		if (it != _symbols.end()) {
+			return _books[it->second];
+		}
+
+		if (_books.size() == MAXSECURITIES) {
+			throw std::runtime_error("too many subscriptions");
+		}
+
+		_books.push_back(OrderBookType2(_sizeHint));
+		_symbols.emplace(instrument, _books.size() - 1);
+
+		OrderBookType2 &book = _books.back();
+		book.SetUserData(data);
+		return book;
 	}
 
+	void addOrder(Order::SharedPtr orderPtr){
+		auto it = _symbols.find(orderPtr->tokenId());
+		if (it == _symbols.end()) {
+			std::cout << " Error - Unknown Security comes, Don't have any OB for this. " << std::endl;
+			throw std::runtime_error("Error - Unknown Security comes, Don't have any OB for this.");
+
+			if (_books.size() == MAXBOOK) {
+				// too many books
+				std::cout << " Error - Too many books." << std::endl;
+				throw std::runtime_error(" Too many books.");
+				return;
+			}
+			_books.push_back(OrderBookType2(_sizeHint));
+			it = _symbols.emplace(orderPtr->tokenId(), _books.size() - 1).first;
+		}
+		int16_t bookid = it->second;
+		OrderBookType2 &book = _books[bookid];
+		bool isBBoUpdated = book.processOrder(orderPtr);
+		_callback(&book, isBBoUpdated);
+	}
+
+	void addTrade(Trade::SharedPtr trade){
+
+	}
+
+	void print(){
+		for(auto& book : _books){
+			std::cout << book;
+		}
+	}
+};
+
+
+struct OrderBookManagerImproved : public OrderBookManagerBase<OrderBookManagerImproved>
+{
+public:
+
+	void init(){
+		OrderGenerator og;
+		for(auto token : og.getTokens()){
+			OrderBookImproved ob(token);
+			_orderBooks.emplace(token, ob);
+		}
+	}
 
 	void addOrder(Order::SharedPtr order){
 		// Check if we have already the OrderBook for this security
@@ -49,13 +186,7 @@ struct OrderBookManagerImproved : private boost::noncopyable
 		if(it == _orderBooks.end()){
 			throw std::runtime_error(" Unknown Security comes in Market Data.");
 		}
-
-//		std::pair<SecurityFrequencyCont::iterator, bool> retVal = _freq.emplace(order->tokenId(), 0);
-//		retVal.first->second += 1;
-		//_logger->info() << "Token: " << order->tokenId() << " --> " << retVal.first->second;
-		// Now we have the orderBook
-		it->second->processOrder(order); // might throw as well
-
+		it->second.processOrder(order); // might throw as well
 	}
 
 	void addTrade(Trade::SharedPtr trade){
@@ -63,60 +194,28 @@ struct OrderBookManagerImproved : private boost::noncopyable
 		if(it == _orderBooks.end()){
 			throw std::runtime_error(" Unknown Security comes in Market Data.");
 		}
-		it->second->processTrade(trade);
+		it->second.processTrade(trade);
 	}
-
-	void print(){
-
-//		_logger->info() << " Total Securities for which orders are coming: " << _freq.size() ;
-//		int maxFreq = 0;
-//		TokenId maxToken;
-//		for(auto& v: _freq){
-//			_logger->info() << " Freq: " << v.first << " <--> " << v.second ;
-//			if(v.second > maxFreq){
-//				maxFreq = v.second;
-//				maxToken = v.first;
-//			}
-//		}
-//		_logger->info() << " Max Freq: " << maxToken << " <--> " << maxFreq ;
-
-
-		for(auto& v : _orderBooks){
-			std::string bookDepthStr ;
-			v.second->printTop5(bookDepthStr);
-			if(!bookDepthStr.empty()){
-				_logger->info() << bookDepthStr ;
-			}
-		}
-
-
-
-
-	}
-
 };
 
-
+/*
 // Old OBM
-
-
-struct OrderBookManager : private boost::noncopyable
+struct OrderBookManagerOld : public OrderBookManagerBase<OrderBookManagerOld>
 {
-	typedef std::unordered_map<TokenId, OrderBook*> OrderBookContainer;
-	OrderBook* _tmpOb;
-	OrderBookContainer _orderBooks;
+	void init(){
 
-	void addOrder(Order* order){
+	}
+	void addOrder(Order::SharedPtr order){
 		// Check if we have already the OrderBook for this security
-		std::pair<OrderBookContainer::iterator, bool> retVal = _orderBooks.insert(std::make_pair(order->tokenId(), _tmpOb));
-		if(retVal.second){
-			retVal.first->second = new OrderBook();
-		}
+		OrderBook tmpOb;
+		std::pair<OrderBookContainerOld::iterator, bool> retVal = _orderBooksOld.emplace(order->tokenId(), std::move(tmpOb));
+//		if(retVal.second){
+//			retVal.first->second = new OrderBook();
+//		}
 		// Now we have the orderBook
-		OrderBook* book = retVal.first->second;
 		switch(order->getType()){
 		case 'N':
-			book->addNew(order);
+			retVal.first->second.processOrder(order);
 			break;
 		case 'M':
 			//book->replace(order);
@@ -125,26 +224,18 @@ struct OrderBookManager : private boost::noncopyable
 			//book->cancel(order);
 			break;
 		default:
-			throw std::runtime_error("Unsupported Order Type.");
+			//throw std::runtime_error("Unsupported Order Type.");
 			break;
 		}
 
 	}
 
-	void addTrade(){
+	void addTrade(Trade::SharedPtr trade){
 
 	}
-
-	void print(){
-
-
-
-		for(auto i : _orderBooks){
-			std::cout << " TokenNo: " << i.first << " Transactions in orderBook: " << i.second->getTransactionId() << std::endl;
-		}
-	}
-
 };
+ */
+
 }
 
 
