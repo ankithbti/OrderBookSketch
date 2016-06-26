@@ -66,21 +66,36 @@ private:
 			case 'N':
 			case 'M':
 			case 'X':
+			case 'H':
+			case 'G':
+			case 'J':
 			{
 				try{
 					if(_runForSingleSec){
-						if((boost::get<MktDataOrderMsg*>(v.second.second))->_toeknNo == 47958){
-							memcpy((void*)data,(void*)(boost::get<MktDataOrderMsg*>(v.second.second)), sizeof(MktDataOrderMsg));
-							doWrite(data, sizeof(MktDataOrderMsg));
-							std::string str;
-							(boost::get<MktDataOrderMsg*>(v.second.second))->toString(str);
-							std::cout << " Packet#: " << ++count << " " << str << std::endl;
 
+						// Create the Buffer
+						memcpy((void*)data,(void*)(&(std::get<0>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(MktDataGlobalHeaderMsg));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg)),(void*)(&(std::get<1>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(char));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)),(void*)(&(std::get<2>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(MktDataOrderMsg));
+
+						if(std::get<2>(boost::get<OrderGenerator::OrderTuple>(v.second.second))._toeknNo == 47958){
+							doWrite(data, sizeof(MktDataGlobalHeaderMsg) + sizeof(char) + sizeof(MktDataOrderMsg));
+							std::string str;
+							std::get<0>(boost::get<OrderGenerator::OrderTuple>(v.second.second)).toString(str);
+							str += " Type: " + boost::lexical_cast<std::string>(std::get<1>(boost::get<OrderGenerator::OrderTuple>(v.second.second))) + " " ;
+							std::get<2>(boost::get<OrderGenerator::OrderTuple>(v.second.second)).toString(str);
+							std::cout << " Packet#: " << ++count << " " << str << std::endl;
 						}
 					}else{
-						memcpy((void*)data,(void*)(boost::get<MktDataOrderMsg*>(v.second.second)), sizeof(MktDataOrderMsg));
-						doWrite(data, sizeof(MktDataOrderMsg));
-						std::cout << " Writing Order: " << ++count << std::endl;
+						memcpy((void*)data,(void*)(&(std::get<0>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(MktDataGlobalHeaderMsg));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg)),(void*)(&(std::get<1>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(char));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)),(void*)(&(std::get<2>(boost::get<OrderGenerator::OrderTuple>(v.second.second)))), sizeof(MktDataOrderMsg));
+						doWrite(data, sizeof(MktDataGlobalHeaderMsg) + sizeof(char) + sizeof(MktDataOrderMsg));
+						std::string str;
+						std::get<0>(boost::get<OrderGenerator::OrderTuple>(v.second.second)).toString(str);
+						str += " Type: " + boost::lexical_cast<std::string>(std::get<1>(boost::get<OrderGenerator::OrderTuple>(v.second.second))) + " ";
+						std::get<2>(boost::get<OrderGenerator::OrderTuple>(v.second.second)).toString(str);
+						std::cout << " Packet#: " << ++count << " " << str << std::endl;
 					}
 				}catch(const std::runtime_error& err){
 					_socket.close();
@@ -88,12 +103,35 @@ private:
 			}
 			break;
 			case 'T':
+			case 'K':
 			{
-//				memcpy((void*)data,(void*)(boost::get<MktDataTradeMsg*>(v.second.second)), sizeof(MktDataTradeMsg));
 				try{
-					// To Do - Will open this later
-					//doWrite(data, sizeof(MktDataOrderMsg));
-					//std::cout << " Writing Trade: " << ++count << std::endl;
+					if(_runForSingleSec){
+
+						// Create the Buffer
+						memcpy((void*)data,(void*)(&(std::get<0>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(MktDataGlobalHeaderMsg));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg)),(void*)(&(std::get<1>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(char));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)),(void*)(&(std::get<2>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(MktDataTradeMsg));
+
+						if(std::get<2>(boost::get<OrderGenerator::TradeTuple>(v.second.second))._toeknNo == 47958){
+							doWrite(data, sizeof(MktDataGlobalHeaderMsg) + sizeof(char) + sizeof(MktDataTradeMsg));
+							std::string str;
+							std::get<0>(boost::get<OrderGenerator::TradeTuple>(v.second.second)).toString(str);
+							str += " Type: " + boost::lexical_cast<std::string>(std::get<1>(boost::get<OrderGenerator::TradeTuple>(v.second.second))) + " ";
+							std::get<2>(boost::get<OrderGenerator::TradeTuple>(v.second.second)).toString(str);
+							std::cout << " Packet#: " << ++count << " " << str << std::endl;
+						}
+					}else{
+						memcpy((void*)data,(void*)(&(std::get<0>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(MktDataGlobalHeaderMsg));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg)),(void*)(&(std::get<1>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(char));
+						memcpy((void*)(data + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)),(void*)(&(std::get<2>(boost::get<OrderGenerator::TradeTuple>(v.second.second)))), sizeof(MktDataTradeMsg));
+						doWrite(data, sizeof(MktDataGlobalHeaderMsg) + sizeof(char) + sizeof(MktDataTradeMsg));
+						std::string str;
+						std::get<0>(boost::get<OrderGenerator::TradeTuple>(v.second.second)).toString(str);
+						str += " Type: " + boost::lexical_cast<std::string>(std::get<1>(boost::get<OrderGenerator::TradeTuple>(v.second.second))) + " ";
+						std::get<2>(boost::get<OrderGenerator::TradeTuple>(v.second.second)).toString(str);
+						std::cout << " Packet#: " << ++count << " " << str << std::endl;
+					}
 				}catch(const std::runtime_error& err){
 					_socket.close();
 				}
@@ -103,7 +141,7 @@ private:
 				break;
 			}
 			delete [] data;
-			boost::this_thread::sleep(boost::posix_time::microseconds(5));
+			boost::this_thread::sleep(boost::posix_time::microseconds(10));
 		}
 		std::cout << " Waiting for 5 mins. " << std::endl;
 		boost::this_thread::sleep(boost::posix_time::seconds(5*60));

@@ -138,14 +138,14 @@ void OrderBookImproved::processTrade(Trade::SharedPtr tradePtr){
 	}
 }
 
-void OrderBookImproved::printTop5(std::string& str) const{
+void OrderBookImproved::toString(std::string& str) const{
 	if(_bids.size() == 0 && _asks.size() == 0){
 		return;
 	}
 	std::stringstream obStr;
-	obStr << _token << " : [ " ;
 	int count = 0;
-	obStr << " Bids { " ;
+	if(_bids.size() > 0)
+		obStr << std::endl << " Bids: " ;
 	for(MapConstIt it = _bids.begin() ; it != _bids.end(); it = _bids.upper_bound(it->first)){
 		std::pair<MapConstIt, MapConstIt> eqRangeIt = _bids.equal_range(it->first);
 		Quantity aggQuantity = 0;
@@ -161,8 +161,8 @@ void OrderBookImproved::printTop5(std::string& str) const{
 			obStr << ", ";
 		}
 	}
-	obStr << " } ";
-	obStr << " <--> Asks { ";
+	if(_asks.size() > 0)
+		obStr << std::endl << " Sell: ";
 	count = 0;
 	for(MapConstIt it = _asks.begin() ; it != _asks.end(); it = _asks.upper_bound(it->first)){
 		std::pair<MapConstIt, MapConstIt> eqRangeIt = _asks.equal_range(it->first);
@@ -179,9 +179,7 @@ void OrderBookImproved::printTop5(std::string& str) const{
 			obStr << ", ";
 		}
 	}
-	obStr << " } ";
-	obStr << " ] " ;
-	str = obStr.str();
+	str += obStr.str();
 }
 
 }

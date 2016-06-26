@@ -108,8 +108,8 @@ public:
 		_books.reserve(MAXSECURITIES);
 	}
 
-	void init(){
-		OrderGenerator og;
+	void init(const std::string& file){
+		OrderGenerator og(file);
 		for(auto token : og.getTokens()){
 			subscribe(token);
 			//OrderBookImproved ob(token);
@@ -152,17 +152,35 @@ public:
 		}
 		int16_t bookid = it->second;
 		OrderBookType2 &book = _books[bookid];
-		bool isBBoUpdated = book.processOrder(orderPtr);
-		_callback(&book, isBBoUpdated);
+		book.processOrder(orderPtr);
+		//		bool isBBoUpdated = book.processOrder(orderPtr);
+		//_callback(&book, isBBoUpdated);
 	}
 
 	void addTrade(Trade::SharedPtr trade){
+		auto it = _symbols.find(trade->tokenId());
+		if (it == _symbols.end()) {
+			std::cout << " Error - Unknown Security comes, Don't have any OB for this. " << std::endl;
+			throw std::runtime_error("Error - Unknown Security comes, Don't have any OB for this.");
 
+			if (_books.size() == MAXBOOK) {
+				// too many books
+				std::cout << " Error - Too many books." << std::endl;
+				throw std::runtime_error(" Too many books.");
+				return;
+			}
+			_books.push_back(OrderBookType2(_sizeHint));
+			it = _symbols.emplace(trade->tokenId(), _books.size() - 1).first;
+		}
+		int16_t bookid = it->second;
+		OrderBookType2 &book = _books[bookid];
+		book.processTrade(trade);
 	}
 
-	void print(){
-		for(auto& book : _books){
-			std::cout << book;
+	void printOrderBookForSymbol(std::string& str, TokenId token){
+		auto it = _symbols.find(token);
+		if (it != _symbols.end()) {
+			_books[it->second].toString(str);
 		}
 	}
 };
@@ -172,8 +190,8 @@ struct OrderBookManagerImproved : public OrderBookManagerBase<OrderBookManagerIm
 {
 public:
 
-	void init(){
-		OrderGenerator og;
+	void init(const std::string& file){
+		OrderGenerator og(file);
 		for(auto token : og.getTokens()){
 			OrderBookImproved ob(token);
 			_orderBooks.emplace(token, ob);
@@ -195,6 +213,13 @@ public:
 			throw std::runtime_error(" Unknown Security comes in Market Data.");
 		}
 		it->second.processTrade(trade);
+	}
+
+	void printOrderBookForSymbol(std::string& str, TokenId token){
+		OrderBookContainerIt it = _orderBooks.find(token);
+		if (it != _orderBooks.end()) {
+			it->second.toString(str);
+		}
 	}
 };
 

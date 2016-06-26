@@ -15,18 +15,15 @@ namespace obLib{
 template<typename Clock = std::chrono::steady_clock>
 struct LatencyChecker{
 
-	std::string& _str;
 	static std::vector<size_t> _latencies;
+	std::string& _str;
 	typename Clock::time_point _startTime;
-
 	static long _averageLatency ;
 	static long _count;
 	static long _maxLatency;
 	static long _minlatency;
 
-	//std::shared_ptr<spdlog::logger>& _logger;
-
-	LatencyChecker(std::string& str) :  _str(str), _startTime(Clock::now()){
+	LatencyChecker(std::string& str) : _str(str), _startTime(Clock::now()){
 	}
 
 	~LatencyChecker(){
@@ -38,9 +35,7 @@ struct LatencyChecker{
 		if(_maxLatency < latency){
 			_maxLatency = latency;
 		}
-		//_averageLatency += latency;
-		_str += " Latency: " +  boost::lexical_cast<std::string>(latency) + " [ ns ] ";
-		std::cout << " " << latency << std::endl;
+		_str += " Lat: " + boost::lexical_cast<std::string>(latency);
 	}
 
 	static size_t getMin()
@@ -81,7 +76,7 @@ struct LatencyChecker{
 	static void printLatencyArray() {
 
 		//int count = 0;
-		std::sort(_latencies.begin(), _latencies.end(), std::less<size_t>());
+		//std::sort(_latencies.begin(), _latencies.end(), std::less<size_t>());
 		//for(auto& i : _latencies){
 			//_logger->info() << "Index: " << ++count << " - Latency: " << i;
 		//}

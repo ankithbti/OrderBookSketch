@@ -39,6 +39,9 @@ struct Trade
 
 	}
 
+	virtual void print() const = 0;
+	virtual void toString(std::string&) const = 0;
+
 };
 
 struct SimpleTrade : public Trade{
@@ -54,11 +57,11 @@ struct SimpleTrade : public Trade{
 	// For CD segment this should be divided by 10^7 for converting into Rupees. -
 	int32_t _qty; // - 41
 
-	SimpleTrade(const MktDataTradeMsg& msg) {
-		_globalMktDataHeader._len = msg._globalMktDataHeader._len;
-		_globalMktDataHeader._seqNo = msg._globalMktDataHeader._seqNo;
-		_globalMktDataHeader._streamId = msg._globalMktDataHeader._streamId;
-		_msgType = msg._msgType;
+	SimpleTrade(const MktDataGlobalHeaderMsg& header, const char& msgType, const MktDataTradeMsg& msg) {
+		_globalMktDataHeader._len = header._len;
+		_globalMktDataHeader._seqNo = header._seqNo;
+		_globalMktDataHeader._streamId = header._streamId;
+		_msgType = msgType;
 		_timestamp = msg._timestamp;
 		_buyOrderId = msg._buySideOrderId;
 		_sellOrderId = msg._sellSideOrderId;
@@ -70,6 +73,13 @@ struct SimpleTrade : public Trade{
 	void print() const{
 		std::cout << " SimpleMessage - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
 				<< " Body: [ " << _msgType << " " << _timestamp << " " << _buyOrderId << " " << _sellOrderId << " " << _toeknNo << " " << _price << " " << _qty << " ] " << std::endl;
+	}
+
+	void toString(std::string& str) const{
+		std::stringstream ss;
+		ss << " - H: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " B: [ " << _msgType << " " << _timestamp << " " << _buyOrderId << " " << _sellOrderId << " " << _toeknNo << " " << _price << " " << _qty << " ] " ;
+		str += ss.str();
 	}
 
 	virtual SeqNo getSeqNo() const

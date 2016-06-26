@@ -12,6 +12,8 @@
 #include <OrderBook.hpp>
 #include <OrderBookManager.hpp>
 #include <LatencyChecker.hpp>
+#include <logger/Logger.hpp>
+#include <logger/LogPolicy.hpp>
 
 namespace obLib{
 struct Subscriber
@@ -19,22 +21,32 @@ struct Subscriber
 	enum { max_length = 1024 };
 	char _data[max_length];
 	int pcount ;
-
+	std::string _file;
 	boost::asio::ip::tcp::socket _socket;
 	boost::asio::ip::tcp::resolver _resolver;
-	//OrderBookManagerBase<OrderBookManagerTemp> _orderBookManager;
+
 	//OrderBookManagerImproved _orderBookManager;
+
 	OrderBookType2CB _cb;
 	OrderBookManagerType2<OrderBookType2CB> _orderBookManager;
+
+	//OrderBookManagerBase<OrderBookManagerTemp> _orderBookManager;
 	//OrderBookManagerBase<OrderBookManagerOld> _orderBookManager;
 
-	Subscriber(boost::asio::io_service& io, const std::string& host, const std::string& port) : _socket(io),
-			_resolver(io), _orderBookManager(_cb, 100000){
-		_orderBookManager.init();
+	Logger<FileLogPolicy> _logger;
+
+
+	Subscriber(boost::asio::io_service& io, const std::string& host, const std::string& port, const std::string& file) : _file(file),
+			_socket(io),
+			_resolver(io),
+			_orderBookManager(_cb, 100000),
+			_logger("Subscriber", "logs/Subscribe"){
+		_orderBookManager.init(_file);
 		pcount = 0;
 		LatencyChecker<>::_minlatency = std::numeric_limits<int>::max();
 		LatencyChecker<>::_maxLatency = 0;
 		connect(host, port);
+
 	}
 
 	~Subscriber(){
@@ -66,46 +78,18 @@ private:
 
 	void doReadHeader(){
 		boost::asio::async_read(_socket,
-				boost::asio::buffer(_data, sizeof(MktDataOrderMsg)),
+				boost::asio::buffer(_data, sizeof(MktDataGlobalHeaderMsg) + sizeof(char)),
 				[this](boost::system::error_code ec, std::size_t length)
 				{
 			if (!ec)
 			{
-				char msgType;
-				memcpy((void*)&msgType, (void*)(_data+sizeof(MktDataGlobalHeaderMsg)), sizeof(char));
 
-				switch(msgType){
-				case 'N':
-				case 'M':
-				case 'X':
-				{
-					MktDataOrderMsg* msg = new MktDataOrderMsg();
-					memcpy((void*)msg, (void*)_data, sizeof(MktDataOrderMsg));
-					std::string str;
-					str = " Packet#: " + boost::lexical_cast<std::string>(++pcount) ;
-					Order::SharedPtr order(new SimpleOrder(*msg));
-					try{
-						LatencyChecker<> lc(str);
-						_orderBookManager.addOrder(order);
-					}catch(const std::runtime_error& err){
-						std::cout << " Exception " << err.what() << std::endl;
-					}
-					msg->toString(str);
-					std::cout << str << std::endl;
-					_orderBookManager.print();
-					delete msg;
-				}
-				break;
-				case 'T':
-				{
-					// To Do
-				}
-				break;
-				default:
-					break;
-				}
-
-				doReadHeader();
+				MktDataGlobalHeaderMsg* header = new MktDataGlobalHeaderMsg;
+				memcpy((void*)header, (void*)(_data), sizeof(MktDataGlobalHeaderMsg));
+				char* msgType = new char;
+				memcpy((void*)msgType, (void*)(_data + sizeof(MktDataGlobalHeaderMsg)), sizeof(char));
+				std::cout << " Packet#: " << ++pcount << std::endl;
+				doReadBody(header, msgType);
 			}
 			else
 			{
@@ -115,7 +99,87 @@ private:
 				});
 	}
 
+	void doReadBody(MktDataGlobalHeaderMsg* header, char* msgType){
 
+		switch(*msgType){
+		case 'N':
+		case 'M':
+		case 'X':
+		case 'G':
+		case 'H':
+		case 'J':
+		{
+			boost::asio::async_read(_socket,
+					boost::asio::buffer(_data, sizeof(MktDataOrderMsg)),
+					[this, &header, &msgType](boost::system::error_code ec, std::size_t length)
+					{
+				if(!ec){
+					MktDataOrderMsg* body = new MktDataOrderMsg;
+					memcpy((void*)body, (void*)_data, sizeof(MktDataOrderMsg));
+					Order::SharedPtr order(new SimpleOrder(*header, *msgType, *body));
+					{
+						std::string str;
+						try{
+							LatencyChecker<> lc(str);
+							_orderBookManager.addOrder(order);
+						}catch(const std::runtime_error& err){
+							std::cout << " Exception " << err.what() << std::endl;
+						}
+						order->toString(str);
+						_orderBookManager.printOrderBookForSymbol(str, body->_toeknNo);
+						_logger.log(std::move(str));
+					}
+
+					delete body;
+
+					doReadHeader();
+				}else{
+					std::cout << "Exception comes - Socket Closed. " << std::endl;
+					_socket.close();
+				}
+					});
+
+		}
+		break;
+		case 'T':
+		case 'K':
+		{
+			boost::asio::async_read(_socket,
+					boost::asio::buffer(_data, sizeof(MktDataTradeMsg)),
+					[this, &header, &msgType](boost::system::error_code ec, std::size_t length)
+					{
+				if(!ec){
+					MktDataTradeMsg* body = new MktDataTradeMsg;
+					memcpy((void*)body, (void*)_data, sizeof(MktDataTradeMsg));
+					Trade::SharedPtr trade(new SimpleTrade(*header, *msgType, *body));
+
+					{
+						std::string str;
+						try{
+							LatencyChecker<> lc(str);
+							_orderBookManager.addTrade(trade);
+						}catch(const std::runtime_error& err){
+							std::cout << " Exception " << err.what() << std::endl;
+						}
+						trade->toString(str);
+						_orderBookManager.printOrderBookForSymbol(str, body->_toeknNo);
+						_logger.log(std::move(str));
+					}
+					delete body;
+
+					doReadHeader();
+				}else{
+					std::cout << "Exception comes - Socket Closed. " << std::endl;
+					_socket.close();
+				}
+					});
+		}
+		break;
+		default:
+			std::cout << " Error: Unknown Packet comes.... " << std::endl;
+			break;
+		}
+	}
 };
 }
 

@@ -186,6 +186,10 @@ public:
 		//_logCV.notify_one();
 	}
 
+	const std::ostream& getStream() const {
+		return _logPolicy->getStream();
+	}
+
 	void run(){
 		while(_isRunning){
 			std::unique_lock<std::mutex> lock(_logMutex);

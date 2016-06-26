@@ -24,6 +24,7 @@ public:
 
 	virtual void openStream() = 0;
 	virtual void closeStream() = 0;
+	virtual const std::ostream& getStream() const = 0;
 
 	template<typename Obj>
 	void write(const Obj& obj){}
@@ -42,12 +43,16 @@ private:
 public:
 
 	explicit FileLogPolicy(const std::string& name = std::string("Default"), const std::string& filePath = std::string("Default")) : LogPolicy(name),
-			_filePath(filePath + "_" + boost::lexical_cast<std::string>(::getpid()) + "_" + boost::lexical_cast<std::string>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".log"){
+	_filePath(filePath + "_" + boost::lexical_cast<std::string>(::getpid()) + "_" + boost::lexical_cast<std::string>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".log"){
 		openStream();
 	}
 
 	~FileLogPolicy(){
 		closeStream();
+	}
+
+	virtual const std::ostream& getStream() const{
+		return *_fstream;
 	}
 
 	virtual void openStream(){
@@ -71,11 +76,17 @@ public:
 
 struct ScreenLogPolicy : public LogPolicy
 {
+private:
+
 	explicit ScreenLogPolicy(const std::string& name = std::string("Default"), const std::string& filePath = std::string("Default")) : LogPolicy(name){
 	}
 
 	~ScreenLogPolicy(){
 
+	}
+
+	virtual const std::ostream& getStream() const{
+		throw std::runtime_error("Can not return stream.");
 	}
 
 	virtual void openStream(){

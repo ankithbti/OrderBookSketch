@@ -14,117 +14,127 @@
 namespace obLib
 {
 
-  struct Order
-  {
-//    typedef std::shared_ptr<Order> SharedPtr;
-    typedef Order* SharedPtr;
+struct Order
+{
+	//    typedef std::shared_ptr<Order> SharedPtr;
+	typedef Order* SharedPtr;
 
 
-    bool is_limit() const{
-      return price() > 0;
-    }
+	bool is_limit() const{
+		return price() > 0;
+	}
 
-    virtual SeqNo getSeqNo() const = 0;
+	virtual SeqNo getSeqNo() const = 0;
 
-    virtual OrderId orderId() const = 0;
+	virtual OrderId orderId() const = 0;
 
-    virtual TokenId tokenId() const = 0;
+	virtual TokenId tokenId() const = 0;
 
-    virtual char getType() const = 0;
-    virtual void setType(char type) = 0;
+	virtual char getType() const = 0;
+	virtual void setType(char type) = 0;
 
-    virtual bool is_buy() const = 0;
+	virtual bool is_buy() const = 0;
 
-    virtual Price price() const = 0;
-    virtual void price(Price p) = 0;
+	virtual Price price() const = 0;
+	virtual void price(Price p) = 0;
 
-    virtual Quantity order_qty() const = 0;
-    virtual void order_qty(Quantity q) = 0;
+	virtual Quantity order_qty() const = 0;
+	virtual void order_qty(Quantity q) = 0;
 
-    virtual int64_t getTimeStmap() const = 0;
+	virtual int64_t getTimeStmap() const = 0;
 
 
-    virtual ~Order(){
+	virtual ~Order(){
 
-    }
+	}
 
-  };
+	virtual void print() const = 0;
+	virtual void toString(std::string&) const = 0;
 
-  struct SimpleOrder : public Order{
+};
 
-    MktDataGlobalHeaderMsg _globalMktDataHeader; // 8 Bytes - 0
-    char _msgType; // 'N' - New / 'M' - Modify / 'X' - Cancel - 8
-    int64_t _timestamp; // milliseconds from 01-Jan-1980 00:00:00 - 9
-    int64_t _orderId; // Day Unique Order Ref # - 17
-    int32_t _toeknNo; // Unique Contract Identifier - 25
-    char _orderType; // 'B' / 'S' - 29
-    int32_t _price; // in paise , // The price is in multiples of the tick size. - 30
-    // For FO and CM segments this should be divided by 100 for converting into Rupees
-    // For CD segment this should be divided by 10^7 for converting into Rupees. -
-    int32_t _qty; // - 34
+struct SimpleOrder : public Order{
 
-    SimpleOrder(const MktDataOrderMsg& msg){
-      _globalMktDataHeader._len = msg._globalMktDataHeader._len;
-      _globalMktDataHeader._seqNo = msg._globalMktDataHeader._seqNo;
-      _globalMktDataHeader._streamId = msg._globalMktDataHeader._streamId;
-      _msgType = msg._msgType;
-      _timestamp = msg._timestamp;
-      _orderId = msg._orderId;
-      _toeknNo = msg._toeknNo;
-      _orderType = msg._orderType;
-      _price = msg._price;
-      _qty = msg._qty;
-    }
+	MktDataGlobalHeaderMsg _globalMktDataHeader; // 8 Bytes - 0
+	char _msgType; // 'N' - New / 'M' - Modify / 'X' - Cancel - 8
+	int64_t _timestamp; // milliseconds from 01-Jan-1980 00:00:00 - 9
+	int64_t _orderId; // Day Unique Order Ref # - 17
+	int32_t _toeknNo; // Unique Contract Identifier - 25
+	char _orderType; // 'B' / 'S' - 29
+	int32_t _price; // in paise , // The price is in multiples of the tick size. - 30
+	// For FO and CM segments this should be divided by 100 for converting into Rupees
+	// For CD segment this should be divided by 10^7 for converting into Rupees. -
+	int32_t _qty; // - 34
 
-    void print() const{
-      std::cout << " SimpleMessage - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
-	  << " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
-    }
+	SimpleOrder(const MktDataGlobalHeaderMsg& header, const char& msgType, const MktDataOrderMsg& msg){
+		_globalMktDataHeader._len = header._len;
+		_globalMktDataHeader._seqNo = header._seqNo;
+		_globalMktDataHeader._streamId = header._streamId;
+		_msgType = msgType;
+		_timestamp = msg._timestamp;
+		_orderId = msg._orderId;
+		_toeknNo = msg._toeknNo;
+		_orderType = msg._orderType;
+		_price = msg._price;
+		_qty = msg._qty;
+	}
 
-    virtual SeqNo getSeqNo() const{
-    	return _globalMktDataHeader._seqNo;
-    }
+	void print() const{
+		std::cout << " SimpleMessage - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
+	}
 
-    virtual int64_t getTimeStmap() const{
-    	return _timestamp;
-    }
+	void toString(std::string& str) const{
+		std::stringstream ss;
+		ss << " - H: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " B: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " ;
+		str += ss.str();
+	}
 
-    virtual OrderId orderId() const{
-      return _orderId;
-    }
+	virtual SeqNo getSeqNo() const{
+		return _globalMktDataHeader._seqNo;
+	}
 
-    virtual TokenId tokenId() const {
-      return _toeknNo;
-    }
+	virtual int64_t getTimeStmap() const{
+		return _timestamp;
+	}
 
-    virtual char getType() const {
-      return _msgType;
-    }
-    virtual void setType(char type){
-      _msgType = type;
-    }
+	virtual OrderId orderId() const{
+		return _orderId;
+	}
 
-    virtual bool is_buy() const {
-      return _orderType == 'B';
-    }
+	virtual TokenId tokenId() const {
+		return _toeknNo;
+	}
 
-    virtual Price price() const {
-      return _price;
-    }
+	virtual char getType() const {
+		return _msgType;
+	}
+	virtual void setType(char type){
+		_msgType = type;
+	}
 
-    virtual void price(Price p){
-    	_price = p;
-    }
+	virtual bool is_buy() const {
+		return _orderType == 'B';
+	}
 
-    virtual Quantity order_qty() const{
-      return _qty;
-    }
+	virtual Price price() const {
+		return _price;
+	}
 
-    virtual void order_qty(Quantity q){
-      _qty = q;
-    }
+	virtual void price(Price p){
+		_price = p;
+	}
 
-  };
+	virtual Quantity order_qty() const{
+		return _qty;
+	}
+
+	virtual void order_qty(Quantity q){
+		_qty = q;
+	}
+
+};
 }
 
 

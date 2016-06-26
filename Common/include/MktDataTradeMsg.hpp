@@ -15,8 +15,8 @@ namespace obLib{
 #pragma pack(push, 1) // For memory alignment
 struct MktDataTradeMsg
 {
-	MktDataGlobalHeaderMsg _globalMktDataHeader;
-	char _msgType; // 'T'
+	//MktDataGlobalHeaderMsg _globalMktDataHeader;
+	//char _msgType; // 'T'
 	int64_t _timestamp; // milliseconds from 01-Jan-1980 00:00:00
 
 	// Any one of the below can be 0
@@ -30,19 +30,21 @@ struct MktDataTradeMsg
 	int32_t _qty;
 
 	void print() const{
-		std::cout << " Message - Header: [ "
-				<< _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
-				<< " Body: [ " << _msgType << " " << _timestamp << " " << _buySideOrderId << " "
+		std::cout << " Body: [ "
+				/*<< _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " Body: [ " << _msgType << " " << _timestamp */
+				<< " " << _buySideOrderId << " "
 				<< _sellSideOrderId << " " << _toeknNo << " " << _price << " " << _qty << " ] " << std::endl;
 	}
 
 	void toString(std::string& str){
 		std::stringstream ss;
-		ss << " Message - Header: [ "
-				<< _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
-				<< " Body: [ " << _msgType << " " << _timestamp << " " << _buySideOrderId << " "
+		ss << " Body: [ "
+				/*<< _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " Body: [ " << _msgType << " " << _timestamp */
+				<< " " << _buySideOrderId << " "
 				<< _sellSideOrderId << " " << _toeknNo << " " << _price << " " << _qty << " ] ";
-		str = ss.str();
+		str += ss.str();
 	}
 
 };

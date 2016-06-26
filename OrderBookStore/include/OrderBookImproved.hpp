@@ -41,12 +41,12 @@ namespace obLib{
   public:
 
     OrderBookImproved(const TokenId& token) : _token(token){
-
+    	(void)_token;
     }
 
     void processOrder(Order::SharedPtr orderPtr);
     void processTrade(Trade::SharedPtr tradePtr);
-    void printTop5(std::string& str) const;
+    void toString(std::string& str) const;
 
   };
 

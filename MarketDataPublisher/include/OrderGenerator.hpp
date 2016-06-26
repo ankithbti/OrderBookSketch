@@ -48,10 +48,22 @@ std::string hex_to_string(const std::string& input)
 
 struct OrderGenerator{
 
-	typedef std::pair<char, boost::variant<MktDataOrderMsg*, MktDataTradeMsg*> > TypeMktDataPair;
+	struct OrderMsg{
+
+	};
+
+	struct TradeMsg{
+
+	};
+
+	typedef std::tuple<MktDataGlobalHeaderMsg, char, MktDataOrderMsg> OrderTuple;
+	typedef std::tuple<MktDataGlobalHeaderMsg, char, MktDataTradeMsg> TradeTuple;
+	typedef std::pair<char, boost::variant<OrderTuple, TradeTuple> > TypeMktDataPair;
 	typedef std::map<int32_t,  TypeMktDataPair> MktDataContainer;
-	std::vector<MktDataTradeMsg*> _trades;
-	std::vector<MktDataOrderMsg*> _orders;
+	typedef std::vector<OrderTuple>  OrderMsgs;
+	typedef std::vector<TradeTuple>  TradeMsgs;
+	OrderMsgs _orders;
+	TradeMsgs _trades;
 	std::set<int32_t> _tokens;
 	MktDataContainer _mktDataContainer;
 
@@ -59,11 +71,11 @@ struct OrderGenerator{
 		return _tokens;
 	}
 
-	const std::vector<MktDataOrderMsg*>& getOrders() const {
+	const OrderMsgs& getOrders() const {
 		return _orders;
 	}
 
-	const std::vector<MktDataTradeMsg*>& getTrades() const {
+	const TradeMsgs& getTrades() const {
 		return _trades;
 	}
 
@@ -73,12 +85,12 @@ struct OrderGenerator{
 
 	~OrderGenerator(){
 
-		for(auto msg: _orders){
-			delete msg;
-		}
-		for(auto msg : _trades){
-			delete msg;
-		}
+		//		for(auto msg: _orders){
+		//			delete msg;
+		//		}
+		//		for(auto msg : _trades){
+		//			delete msg;
+		//		}
 
 	}
 
@@ -118,6 +130,8 @@ struct OrderGenerator{
 						continue;
 					}
 
+					MktDataGlobalHeaderMsg header;
+					memcpy((void*)&header, (void*)decimalStr.c_str() , sizeof(MktDataGlobalHeaderMsg));
 					char msgType;
 					memcpy((void*)&msgType, (void*)(decimalStr.c_str() + sizeof(MktDataGlobalHeaderMsg)) , sizeof(char));
 
@@ -125,42 +139,38 @@ struct OrderGenerator{
 					case 'M':
 					case 'N':
 					case 'X':
-					{
-						// Outright Order
-						MktDataOrderMsg * mom = new MktDataOrderMsg();
-						memcpy((void*)mom, (void*)decimalStr.c_str(), sizeof(MktDataOrderMsg));
-						++orderCount;
-						_orders.push_back(mom);
-						_mktDataContainer.emplace(mom->_globalMktDataHeader._seqNo, std::make_pair(mom->_msgType, mom));
-						_tokens.insert(mom->_toeknNo);
-
-					}
-					break;
-					case 'T':
-					{
-						// Trade
-						MktDataTradeMsg * mtm = new MktDataTradeMsg();
-						memcpy((void*)mtm, (void*)decimalStr.c_str(), sizeof(MktDataTradeMsg));
-						++tradeCount;
-						_trades.push_back(mtm);
-						_mktDataContainer.emplace(mtm->_globalMktDataHeader._seqNo, std::make_pair(mtm->_msgType, mtm));
-						_tokens.insert(mtm->_toeknNo);
-
-					}
-					break;
 					case 'G':
 					case 'H':
 					case 'J':
 					{
-						// Spread Order
-						// G - New, H - Modify, J - Cancel
-						std::cout << lineNo << " Spread Order. " << std::endl;
+						// Outright Order
+						MktDataOrderMsg body;
+						memcpy((void*)&body, (void*)(decimalStr.c_str() + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)), sizeof(MktDataOrderMsg));
+						++orderCount;
+						_orders.emplace_back(std::make_tuple(header, msgType, body));
+						OrderTuple orderType = std::make_tuple(header, msgType, body);
+						TypeMktDataPair typeMsg = std::make_pair(msgType, orderType);
+						//_mktDataContainer.insert(std::pair<int64_t, TypeMktDataPair >(header._seqNo, typeMsg));
+						_mktDataContainer.emplace(header._seqNo, typeMsg);
+						_tokens.insert(body._toeknNo);
+
 					}
 					break;
+					case 'T':
 					case 'K':
-						// Spread Trade
-						std::cout << lineNo << " Spread Trade. " << std::endl;
-						break;
+					{
+						// Trade
+						MktDataTradeMsg body;
+						memcpy((void*)&body, (void*)(decimalStr.c_str() + sizeof(MktDataGlobalHeaderMsg) + sizeof(char)), sizeof(MktDataTradeMsg));
+						++tradeCount;
+						_trades.emplace_back(std::make_tuple(header, msgType, body));
+						TradeTuple tradeType = std::make_tuple(header, msgType, body);
+						TypeMktDataPair typeMsg = std::make_pair(msgType, tradeType);
+						//_mktDataContainer.insert(std::pair<int64_t, TypeMktDataPair >(header._seqNo, typeMsg));
+						_mktDataContainer.emplace(header._seqNo, typeMsg);
+						_tokens.insert(body._toeknNo);
+					}
+					break;
 					default:
 						throw std::runtime_error(" Unsupported MktData message.");
 						break;

@@ -15,8 +15,8 @@ namespace obLib{
 #pragma pack(push, 1) // For memory alignment
 struct MktDataOrderMsg
 {
-	MktDataGlobalHeaderMsg _globalMktDataHeader; // 8 Bytes - 0
-	char _msgType; // 'N' - New / 'M' - Modify / 'X' - Cancel - 8
+	//MktDataGlobalHeaderMsg _globalMktDataHeader; // 8 Bytes - 0
+	//char _msgType; // 'N' - New / 'M' - Modify / 'X' - Cancel - 8
 	int64_t _timestamp; // milliseconds from 01-Jan-1980 00:00:00 - 9
 	int64_t _orderId; // Day Unique Order Ref # - 17
 	int32_t _toeknNo; // Unique Contract Identifier - 25
@@ -27,14 +27,14 @@ struct MktDataOrderMsg
 	int32_t _qty; // - 34
 
 	void print() const{
-		std::cout << " Message - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
-				<< " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
+		std::cout << " Body: [ " /*<< _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " Body: [ " << _msgType << " " << _timestamp << " " */  << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " << std::endl;
 	}
 
-	void toString(std::string& str){
+	void toString(std::string& str) const{
 		std::stringstream ss;
-		ss << " , Message - Header: [ " << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
-				<< " Body: [ " << _msgType << " " << _timestamp << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " ;
+		ss << " , Body: [ " /* << _globalMktDataHeader._len << " " << _globalMktDataHeader._streamId << " " << _globalMktDataHeader._seqNo << " ] "
+				<< " Body: [ " << _msgType  */ << " " << _orderId << " " << _toeknNo << " " << _orderType << " " << _price << " " << _qty << " ] " ;
 		str += ss.str();
 	}
 };

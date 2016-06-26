@@ -31,6 +31,11 @@ struct BestPrice {
 				<< ", " << best.askqty << ")";
 		return out;
 	}
+
+	void toString(std::stringstream& out){
+		out << "BestPrice(" << bidqty << ", " << bid << ", " << ask
+				<< ", " << askqty << ")";
+	}
 };
 
 class OrderBookType2
@@ -50,10 +55,15 @@ public:
 	struct Level {
 		int64_t price = 0;
 		int64_t qty = 0;
+		int32_t orderCount = 0;
 
 		friend std::ostream &operator<<(std::ostream &out, const Level &level) {
-			out << " { " << level.price << " | " << level.qty << " }";
+			out << " { " << level.price << " | " << level.qty << " | " << level.orderCount << " }";
 			return out;
+		}
+
+		void toString(std::stringstream& out){
+			out << price << "|" << qty << "|" << orderCount ;
 		}
 	};
 
@@ -61,6 +71,8 @@ public:
 private:
 
 	//typedef std::pair<int16_t, Order::SharedPtr> OrderEntry;
+	typedef HashMap<OrderId, Order::SharedPtr, Hash>::iterator OrdersIt;
+	typedef HashMap<OrderId, Order::SharedPtr, Hash>::const_iterator OrdersConstIt;
 
 	void *data_ = nullptr;
 	size_t _sizeHint = 0;
@@ -126,12 +138,55 @@ public:
 	}
 
 	bool processTrade(Trade::SharedPtr tradePtr){
-		return false;
+		OrderId buyOrderId = tradePtr->buyOrderId();
+		OrderId sellOrderId = tradePtr->sellOrderId();
+		bool retVal = false;
+		if(buyOrderId != 0){
+			auto it = _orders.find(buyOrderId);
+			if(it == _orders.end()){
+				// Ignore this as we don't have its reference
+			}else{
+				if(it->second->order_qty() <= tradePtr->order_qty()){
+					// Delet this Order as well
+					_orders.erase(it);
+				}
+				retVal = doTrade(true, tradePtr->price(), tradePtr->order_qty());
+			}
+		}
+		if(sellOrderId != 0){
+			auto it = _orders.find(buyOrderId);
+			if(it == _orders.end()){
+				// Ignore this as we don't have its reference
+				retVal = retVal || false;
+			}else{
+				if(it->second->order_qty() <= tradePtr->order_qty()){
+					// Delet this Order as well
+					_orders.erase(it);
+				}
+				retVal = (retVal || doTrade(false, tradePtr->price(), tradePtr->order_qty()));
+			}
+		}
+		return retVal;
 	}
 
-
-
 private:
+
+	bool doTrade(bool isBuy, Price price, Quantity qty)
+	{
+		auto &side = isBuy ? buy_ : sell_;
+		int64_t prio = isBuy ? -price : price;
+		auto it = side.find(prio);
+		if (it == side.end()) {
+			return false;
+		}
+		// Reduce Qty in Level
+		it->second.qty -= qty;
+		it->second.orderCount -= 1;
+		if(it->second.qty <= 0){
+			side.erase(it);
+		}
+		return it == side.begin(); // BBO changes
+	}
 
 	bool addNewOrder(Order::SharedPtr orderPtr){
 		auto &side = orderPtr->is_buy() ? buy_ : sell_;
@@ -139,6 +194,7 @@ private:
 		auto it = side.insert(std::make_pair(prio, Level())).first;
 		it->second.price = orderPtr->price();
 		it->second.qty += orderPtr->order_qty();
+		it->second.orderCount += 1;
 		return it == side.begin(); // Has been added to BBO
 	}
 
@@ -150,6 +206,7 @@ private:
 			int64_t prio = oldOrderPtr->is_buy() ? -oldOrderPtr->price() : oldOrderPtr->price();
 			auto removeIt = side.insert(std::make_pair(prio, Level())).first;
 			removeIt->second.qty -= oldOrderPtr->order_qty();
+			removeIt->second.orderCount -= 1;
 			if(removeIt->second.qty <= 0){
 				side.erase(removeIt);
 			}
@@ -160,6 +217,7 @@ private:
 			auto addIt = side.insert(std::make_pair(newPrio, Level())).first;
 			addIt->second.price = newOrderPtr->price();
 			addIt->second.qty += newOrderPtr->order_qty();
+			addIt->second.orderCount += 1;
 
 			bool viaAdd = (addIt == side.begin());
 			return (viaAdd || viaErase);
@@ -190,6 +248,7 @@ private:
 		}
 		// Reduce Qty in Level
 		it->second.qty -= oldOrderPtr->order_qty();
+		it->second.orderCount -= 1;
 		if(it->second.qty <= 0){
 			side.erase(it);
 		}
@@ -210,6 +269,37 @@ private:
 			bp.ask = sell->second.price;
 		}
 		return bp;
+	}
+
+public:
+	void toString(std::string& str){
+		std::stringstream out;
+		if(buy_.size() > 0){
+			out << std::endl << " Buy: ";
+		}
+		int count = 0;
+		for (auto it = buy_.rbegin(); it != buy_.rend(); it++) {
+			it->second.toString(out) ;
+			if(++count == 10){
+				break;
+			}else{
+				out << ", ";
+			}
+		}
+
+		if(sell_.size() > 0){
+			out << std::endl << " Sell: " ;
+		}
+		count  = 0;
+		for (auto it = sell_.rbegin(); it != sell_.rend(); it++) {
+			it->second.toString(out) ;
+			if(++count == 10){
+				break;
+			}else{
+				out << ", ";
+			}
+		}
+		str += out.str();
 	}
 
 	friend std::ostream &operator<<(std::ostream &out, const OrderBookType2 &book) {
@@ -239,209 +329,6 @@ private:
 		return out;
 	}
 };
-
-/*
-template <typename Callback>
-struct OrderBookManagerType2{
-public:
-	static constexpr int16_t NOBOOK = std::numeric_limits<int16_t>::max();
-	static constexpr int16_t MAXBOOK = std::numeric_limits<int16_t>::max();
-	static constexpr int16_t MAXSECURITIES = std::numeric_limits<int16_t>::max();
-private:
-	struct Hash {
-		size_t operator()(uint64_t h) const noexcept {
-			h ^= h >> 33;
-			h *= 0xff51afd7ed558ccd;
-			h ^= h >> 33;
-			h *= 0xc4ceb9fe1a85ec53;
-			h ^= h >> 33;
-			return h;
-		}
-	};
-
-	Callback& _callback;
-	size_t _sizeHint = 0;
-	bool _all_orders = false;
-	bool _all_books = false;
-
-	std::vector<OrderBookType2> _books;
-	HashMap<TokenId, uint16_t, Hash> _symbols; // Value of map gives the index of OrderBook in books_
-	typedef std::pair<int16_t, Order::SharedPtr> OrderEntry;
-	HashMap<OrderId, OrderEntry, Hash> _orders;
-
-public:
-
-	OrderBookManagerType2(Callback& cb, size_t sizeHint, bool all_orders = false, bool all_books = false) :
-		_callback(cb),
-		_all_orders(all_orders),
-		_all_books(all_books),
-		_symbols(MAXSECURITIES, 0),
-		_orders(sizeHint, std::numeric_limits<uint64_t>::max()){
-		_sizeHint = _orders.bucket_count();
-		_books.reserve(MAXSECURITIES);
-	}
-
-	OrderBookType2 &Subscribe(TokenId instrument, void *data = NULL) {
-		auto it = _symbols.find(instrument);
-		if (it != _symbols.end()) {
-			return _books[it->second];
-		}
-
-		if (_books.size() == MAXSECURITIES) {
-			throw std::runtime_error("too many subscriptions");
-		}
-
-		_books.push_back(OrderBookType2());
-		_symbols.emplace(instrument, _books.size() - 1);
-
-		OrderBookType2 &book = _books.back();
-		book.SetUserData(data);
-		return book;
-	}
-
-	void Add(Order::SharedPtr orderPtr) {
-		auto it = _symbols.find(orderPtr->tokenId());
-		if (it == _symbols.end()) {
-			//			if (!_all_books) {
-			//				if (_all_orders) {
-			//					orders_.emplace(ref, Order(price, qty, buy_sell, NOBOOK));
-			//				}
-			//				return;
-			//			}
-			if (_books.size() == MAXBOOK) {
-				// too many books
-				return;
-			}
-			_books.push_back(OrderBookType2());
-			it = _symbols.emplace(orderPtr->tokenId(), _books.size() - 1).first;
-		}
-		int16_t bookid = it->second;
-		OrderBookType2 &book = _books[bookid];
-		if (_orders.emplace(orderPtr->orderId(), std::make_pair(bookid,orderPtr)).second) {
-			bool top = book.Add(orderPtr);
-			_callback(&book, top);
-		}
-	}
-
-	void Executed(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderPtr);
-			_callback.OnTrade(&book, top);
-		}
-
-		orderEntry.second->order_qty(orderEntry.second->order_qty() - orderPtr->order_qty());
-		if (orderEntry.second->order_qty() <= 0) {
-			_orders.erase(oit);
-		}
-	}
-
-	void ExecutedAtPrice(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderPtr);
-			_callback(&book, top);
-		}
-
-		orderEntry.second->order_qty(orderEntry.second->order_qty() - orderPtr->order_qty());
-		if (orderEntry.second->order_qty() <= 0) {
-			_orders.erase(oit);
-		}
-	}
-
-	void Reduce(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderPtr);
-			_callback(&book, top);
-		}
-
-		orderEntry.second->order_qty(orderEntry.second->order_qty() - orderPtr->order_qty());
-		if (orderEntry.second->order_qty() <= 0) {
-			_orders.erase(oit);
-		}
-	}
-
-	void Delete(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderEntry.second);
-			_callback(&book, top);
-		}
-		_orders.erase(oit);
-	}
-
-	void Replace(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderEntry.second);
-			bool top2 = book.Add(orderPtr);
-			_callback(&book, top || top2);
-		}
-		_orders.erase(oit);
-		_orders.emplace(orderPtr->orderId(), std::make_pair(orderEntry.first, orderPtr));
-	}
-
-	void Modify(Order::SharedPtr orderPtr) {
-		auto oit = _orders.find(orderPtr->orderId());
-		if (oit == _orders.end()) {
-			return;
-		}
-
-		OrderEntry &orderEntry = oit->second;
-		if (orderEntry.first != NOBOOK) {
-			OrderBookType2 &book = _books[orderEntry.first];
-			bool top = book.Reduce(orderEntry.second); // Reduce the older Order
-			bool top2 = book.Add(orderPtr); // Add the new Order
-			_callback(&book, top || top2);
-		}
-
-		orderEntry.second->order_qty(orderPtr->order_qty());
-		orderEntry.second->price(orderPtr->price());
-		if (orderEntry.second->order_qty() <= 0) {
-			_orders.erase(oit);
-		}
-	}
-
-
-
-
-
-
-};
-
- */
-
 
 }
 
