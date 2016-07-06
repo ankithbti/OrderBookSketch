@@ -40,6 +40,10 @@ namespace obLib{
 
   public:
 
+    OrderBookImproved(){
+
+    }
+
     OrderBookImproved(const TokenId& token) : _token(token){
     	(void)_token;
     }

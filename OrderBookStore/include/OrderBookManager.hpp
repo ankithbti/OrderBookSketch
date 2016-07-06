@@ -17,13 +17,20 @@
 #include <HashMap.h>
 #include <FastBuffer.hpp>
 
+#include <sparsehash/dense_hash_map>
+
+
 namespace obLib{
 
 // CRTP
 template<class T>
 struct OrderBookManagerBase : private boost::noncopyable{
 
-	typedef std::unordered_map<TokenId, OrderBookImproved > OrderBookContainer;
+	//typedef std::unordered_map<TokenId, OrderBookImproved > OrderBookContainer;
+	//typedef google::dense_hash_map<TokenId, OrderBookImproved > OrderBookContainer;
+
+	typedef std::unordered_map<TokenId, OrderBookImproved, std::hash<TokenId>,  std::equal_to<TokenId> > OrderBookContainer;
+
 	typedef std::unordered_map<TokenId, int> SecurityFrequencyCont;
 	typedef OrderBookContainer::iterator OrderBookContainerIt;
 	OrderBookContainer _orderBooks;
@@ -191,10 +198,13 @@ struct OrderBookManagerImproved : public OrderBookManagerBase<OrderBookManagerIm
 public:
 
 	void init(const std::string& file){
+//		_orderBooks.set_empty_key(-1);
+//		_orderBooks.set_deleted_key(-2);
 		OrderGenerator og(file);
 		for(auto token : og.getTokens()){
 			OrderBookImproved ob(token);
 			_orderBooks.emplace(token, ob);
+//			_orderBooks.insert(std::pair<TokenId, OrderBookImproved>(token, ob));
 		}
 	}
 

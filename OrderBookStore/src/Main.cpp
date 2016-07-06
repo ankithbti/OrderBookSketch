@@ -3,6 +3,9 @@
 #include <HashMap.h>
 #include <logger/Logger.hpp>
 #include <logger/LogPolicy.hpp>
+#include <memory>
+#include <sparsehash/dense_hash_map>
+#include <session/tcp/TcpClientSession.hpp>
 
 using namespace obLib;
 
@@ -29,6 +32,56 @@ struct Sub{
 
 int main(int argc, char ** argv)
 {
+
+	TcpClientSession tcs("www.google.com", "80");
+
+	if(tcs.connect()){
+		std::cout << "Successfully Connected to " << tcs.getRemoteHost() << ":" << tcs.getRemotePort() << std::endl;
+	}
+	std::this_thread::sleep_for(std::chrono::seconds(10));
+	return 0;
+
+
+	{
+		OrderBook::SharedPtr ob;
+		std::unordered_map<int64_t, OrderBook::SharedPtr> myMap;
+		std::string str;
+		{
+
+//			for(int i = 0 ; i < 100000; ++i){
+//				myMap.emplace(i, ob);
+//			}
+			myMap.emplace(80000,ob);
+			//myMap.find(20000);
+			LatencyChecker<> lc(str);
+			myMap.find(80000);
+//			myMap.find(10);
+//			myMap.find(40000);
+		}
+		std::cout << " Latency of Insertion in std::hashmap -> " << str << std::endl;
+	}
+
+	{
+		OrderBook::SharedPtr ob;
+		google::dense_hash_map<int64_t, OrderBook::SharedPtr> myMap;
+		myMap.set_empty_key(-1);
+		myMap.set_deleted_key(-2);
+		std::string str;
+		{
+
+//			for(int i = 0 ; i < 100000; ++i){
+//				myMap.insert(std::pair<int64_t, OrderBook::SharedPtr>(i, ob));
+//			}
+			myMap.insert(std::pair<int64_t, OrderBook::SharedPtr>(80000, ob));
+			//myMap.find(20000);
+			LatencyChecker<> lc(str);
+			myMap.find(80000);
+//			myMap.find(10);
+//			myMap.find(40000);
+		}
+
+		std::cout << " Latency of Insertion in google::densehashmap -> " << str << std::endl;
+	}
 
 	if(argc < 4)
 	{

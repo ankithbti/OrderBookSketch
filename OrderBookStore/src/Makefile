@@ -4,6 +4,9 @@
 
 BINARY=../bin/OrderBookStoreBinary
 BOOST_BASE=${BOOST_INSTALL_ROOT}
+SPARSE_HASHMAP_BASE=${SPARSE_HASHMAP_ROOT}
+TBB_BASE=${TBB_BASE_ROOT}
+#SGI_STL_BASE=/Users/ankithbti/Desktop/AlphaMineTrading/sgi_stl
 
 ARCH = $(shell uname -m)	# ARCH becomes the output from the uname -m command.
 CXX=/usr/bin/g++
@@ -11,6 +14,7 @@ CXXFLAGS=-g -O2 -std=c++11 -Wall $(INCS)
 
 SRCS = \
 	OrderBookImproved.cpp \
+	TcpClientSession.cpp \
 
 MAIN_SRC = Main.cpp
 
@@ -21,6 +25,8 @@ INCS = -I../include \
 	   -I../../Common/include \
 	   -I../../third_party/spdlog/include \
        -I$(BOOST_BASE)/include \
+       -I${SPARSE_HASHMAP_BASE}/include \
+       -I${TBB_BASE_ROOT}/include \
 
 LIBS = \
         -L$(BOOST_BASE)/lib -lboost_thread \

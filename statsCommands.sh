@@ -8,3 +8,5 @@ cat latency_sort_1.txt | awk '{sum+=$1; sumsq+=$1*$1;} END {print "stdev = " sqr
 
 #Percentile
 cat latency_sort_1.txt | awk 'BEGIN{n=0} {s[n]=$1; sum += $1; n++;} END {print sum/n; print s[int(NR*0.80-0.5)];}'
+
+## cat OrderBookType2CB_Funct_Full.log | grep "Lat" | awk '{print $4}' | sort -n | awk 'BEGIN{n=0} {s[n]=$1; sum += $1; n++;} END {print sum/n; print s[int(NR*0.80-0.5)];}'

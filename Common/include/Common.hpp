@@ -24,6 +24,12 @@
 #include <pthread.h>
 #include <fstream>
 
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
