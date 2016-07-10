@@ -6,6 +6,10 @@
 #include <memory>
 #include <sparsehash/dense_hash_map>
 #include <session/tcp/TcpClientSession.hpp>
+#include <containers/LocklessQ.hpp>
+#include <containers/msglist.hpp>
+#include <containers/msgq.hpp>
+#include <containers/ObjectPool.hpp>
 
 using namespace obLib;
 
@@ -30,10 +34,60 @@ struct Sub{
 	}
 };
 
+
+struct QTest{
+
+	LocklessQ<int> lq;
+	volatile bool _running;
+	std::thread _t;
+	QTest() : _running(true), _t(std::bind(&QTest::consume, this)){
+
+	}
+
+	void add(int i){
+		lq.enqueue(std::move(i));
+	}
+
+	void consume(){
+		std::cout << " Started Consumer Thread. "<< std::endl;
+		while(true){
+			int data;
+			while(_running && !lq.dequeue(data));
+			if(_running){
+				std::cout << data << std::endl;
+			}else{
+				break;
+			}
+		}
+		std::cout << " End Consumer Thread. "<< std::endl;
+	}
+
+	~QTest(){
+		_running = false;
+		_t.join();
+	}
+
+};
+
 int main(int argc, char ** argv)
 {
 
-	TcpClientSession tcs("www.google.com", "80");
+	MsgQ<int> msgQ;
+	return 0;
+
+	QTest qtest;
+
+	qtest.add(10);
+	qtest.add(20);
+	qtest.add(30);
+	qtest.add(40);
+	qtest.add(50);
+
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+
+	return 0;
+
+	TcpClientSession tcs("127.0.0.1", "80");
 
 	if(tcs.connect()){
 		std::cout << "Successfully Connected to " << tcs.getRemoteHost() << ":" << tcs.getRemotePort() << std::endl;
@@ -48,15 +102,15 @@ int main(int argc, char ** argv)
 		std::string str;
 		{
 
-//			for(int i = 0 ; i < 100000; ++i){
-//				myMap.emplace(i, ob);
-//			}
+			//			for(int i = 0 ; i < 100000; ++i){
+			//				myMap.emplace(i, ob);
+			//			}
 			myMap.emplace(80000,ob);
 			//myMap.find(20000);
 			LatencyChecker<> lc(str);
 			myMap.find(80000);
-//			myMap.find(10);
-//			myMap.find(40000);
+			//			myMap.find(10);
+			//			myMap.find(40000);
 		}
 		std::cout << " Latency of Insertion in std::hashmap -> " << str << std::endl;
 	}
@@ -69,15 +123,15 @@ int main(int argc, char ** argv)
 		std::string str;
 		{
 
-//			for(int i = 0 ; i < 100000; ++i){
-//				myMap.insert(std::pair<int64_t, OrderBook::SharedPtr>(i, ob));
-//			}
+			//			for(int i = 0 ; i < 100000; ++i){
+			//				myMap.insert(std::pair<int64_t, OrderBook::SharedPtr>(i, ob));
+			//			}
 			myMap.insert(std::pair<int64_t, OrderBook::SharedPtr>(80000, ob));
 			//myMap.find(20000);
 			LatencyChecker<> lc(str);
 			myMap.find(80000);
-//			myMap.find(10);
-//			myMap.find(40000);
+			//			myMap.find(10);
+			//			myMap.find(40000);
 		}
 
 		std::cout << " Latency of Insertion in google::densehashmap -> " << str << std::endl;

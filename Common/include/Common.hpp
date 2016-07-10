@@ -23,6 +23,8 @@
 #include <stdexcept>
 #include <pthread.h>
 #include <fstream>
+#include <atomic>
+#include <stack>
 
 #include <sys/socket.h>
 #include <sys/types.h>
