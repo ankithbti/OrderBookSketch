@@ -1,19 +1,21 @@
 /*
- * NNFLogonReq.hpp
+ * NNFLogonRes.hpp
  *
- *  Created on: 09-Jul-2016
+ *  Created on: 11-Jul-2016
  *      Author: ankithbti
  */
 
-#ifndef COMMON_INCLUDE_NSE_NNF_NNFLOGONREQ_HPP_
-#define COMMON_INCLUDE_NSE_NNF_NNFLOGONREQ_HPP_
+#ifndef COMMON_INCLUDE_NSE_NNF_NNFLOGONRES_HPP_
+#define COMMON_INCLUDE_NSE_NNF_NNFLOGONRES_HPP_
 
 #include <nse_nnf/NNFHeader.hpp>
 
 namespace obLib{
 
-// SIGN_ON_REQUEST_IN (2300) - 214 bytes [ with Header - 40 bytes ]
-struct NNFLogonReq{
+#pragma pack(push, 2) // For memory alignment
+
+// SIGN_ON_REQUEST_OUT (2301) - 214 bytes [ with Header - 40 bytes ]
+struct NNFLogonRes{
 	int32_t _userId;	// This field should contain the user ID of the member/broker. It accepts
 	// numbers only
 	char _password[8];	// The password should be of exact eight characters in length
@@ -62,4 +64,5 @@ struct NNFLogonReq{
 }
 
 
-#endif /* COMMON_INCLUDE_NSE_NNF_NNFLOGONREQ_HPP_ */
+
+#endif /* COMMON_INCLUDE_NSE_NNF_NNFLOGONRES_HPP_ */
