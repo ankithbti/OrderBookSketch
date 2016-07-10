@@ -10,6 +10,7 @@
 #include <containers/msglist.hpp>
 #include <containers/msgq.hpp>
 #include <containers/ObjectPool.hpp>
+#include <nse_nnf/NNFOrderEntryReq.hpp>
 
 using namespace obLib;
 
@@ -72,7 +73,9 @@ struct QTest{
 int main(int argc, char ** argv)
 {
 
-	MsgQ<int> msgQ;
+
+	std::cout << std::is_pod<MsgQ<int>>() << std::endl;
+
 	return 0;
 
 	QTest qtest;

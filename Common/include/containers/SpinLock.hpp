@@ -45,7 +45,7 @@ class SpinGuard
 private:
 	SpinLock * _mutex;
 public:
-	SpinGuard(SpinLock& mutex) : _mutex(mutex){
+	SpinGuard(SpinLock& mutex) : _mutex(&mutex){
 		_mutex->lock();
 	}
 
@@ -63,12 +63,30 @@ public:
 };
 class Condition : public Lockable{
 public:
-	void signalOne() const;
-	void wait() const;
-	bool wait(int timeout) const;
-	Condition();
-	Condition(SpinLock& mutex);
-	virtual ~Condition();
+	void signalOne() const{
+
+	}
+	void wait() const{
+	}
+	bool wait(int timeout) const{
+		return false;
+	}
+	Condition(){
+
+	}
+	Condition(SpinLock& mutex){
+
+	}
+	virtual ~Condition(){
+
+	}
+	virtual void lock(){
+
+	}
+
+	virtual void unlock(){
+
+	}
 };
 
 

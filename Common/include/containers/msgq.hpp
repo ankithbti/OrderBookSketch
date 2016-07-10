@@ -20,12 +20,13 @@ namespace obLib{
 
 double GetTime(){
 	// To Do
+	return 1.0;
 }
 long long GetTimeuSec(){
-
+	return 1;
 }
 long GetGMTOffset(){
-
+	return 1;
 }
 
 

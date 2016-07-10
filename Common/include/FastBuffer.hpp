@@ -8,7 +8,7 @@
 #ifndef COMMON_INCLUDE_FASTBUFFER_HPP_
 #define COMMON_INCLUDE_FASTBUFFER_HPP_
 
-#include <SpinLock.hpp>
+#include <containers/SpinLock.hpp>
 
 namespace obLib{
 
