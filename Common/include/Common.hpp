@@ -67,6 +67,138 @@ static inline int xchg(volatile int *ptr, int x){
 	return x;
 }
 
+inline void fast_l2a(char* buf, int len, unsigned long i){
+	for(--len; len >= 0; --len){
+		if(!i){
+			buf[len] = '0';
+		}else{
+			buf[len] = (char)('0' + (i%10));
+			i /= 10;
+		}
+	}
+}
+
+inline void fast_i2a(char* buf, int len, unsigned i){
+	for(--len; len >= 0; --len){
+		if(!i){
+			buf[len] = '0';
+		}else{
+			buf[len] = (char)('0' + (i%10));
+			i /= 10;
+		}
+	}
+}
+
+template <int n>
+inline void fast_i2a(char* buf, unsigned i){
+	for(int len = (n-1); len >= 0; --len){
+		if(!i){
+			buf[len] = '0';
+		}else{
+			buf[len] = (char)('0' + (i%10));
+			i /= 10;
+		}
+	}
+}
+
+template<>
+inline void fast_i2a<3>(char *buf, unsigned i){
+	buf[2] = (char)('0' + (i%10)); i /= 10;
+	buf[1] = (char)('0' + (i%10)); i /= 10;
+	buf[0] = (char)('0' + (i%10));
+}
+
+template<>
+inline void fast_i2a<2>(char *buf, unsigned i){
+	buf[1] = (char)('0' + (i%10)); i /= 10;
+	buf[0] = (char)('0' + (i%10));
+}
+
+template<>
+inline void fast_i2a<1>(char *buf, unsigned i){
+	buf[0] = (char)('0' + (i%10));
+}
+
+inline unsigned computeFixCheckSum(char * buf, size_t len){
+	unsigned checksum = 0;
+	for(size_t i = 0; i < len ; ++i){
+		checksum += buf[i];
+	}
+	return checksum;
+}
+
+inline double fast_atof(const char* p){
+	bool frac(false);
+	double sign(1.), value(0.), scale(1.);
+	while(*p == ' '){
+		++p;
+	}
+	if(*p == '-'){
+		sign = -1.;
+		++p;
+	}else if(*p == '+'){
+		++p;
+	}
+
+	// Digits before decimal point
+	while((unsigned int)(*p - '0') < 10){
+		value = value * 10. + (*p - '0');
+		++p;
+	}
+
+	// After decimal point
+	if(*p == '.'){
+		++p;
+		double p10(10.);
+		while((unsigned int)(*p - '0') < 10){
+			value += (*p - '0') / p10;
+			p10 *= 10;
+			++p;
+		}
+	}
+
+	// Handle Exponent
+	if(toupper(*p) == 'E'){
+		unsigned int expon(0);
+		++p;
+
+		if(*p == '-'){
+			frac = true;
+			++p;
+		}
+		else if(*p == '+'){
+			++p;
+		}
+
+		// Digits of Exp
+		while((unsigned int)(*p - '0') < 10){
+			expon = expon * 10 + (*p - '0');
+			++p;
+		}
+
+		if(expon > 308){
+			expon = 308;
+		}
+
+		// Calculate scaling factor
+		while(expon >= 50){
+			scale *= 1E50;
+			expon -= 50;
+		}
+		while(expon >= 8){
+			scale *= 1E8;
+			expon -= 8;
+		}
+		while(expon > 0){
+			scale *= 10.0;
+			expon -= 1;
+		}
+	}
+	return sign * (frac ? (value/scale) : (value * scale));
+}
+
+
+
 }
 
 #endif /* INCLUDE_COMMON_HPP_ */
