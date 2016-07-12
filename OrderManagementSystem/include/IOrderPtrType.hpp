@@ -13,7 +13,7 @@
 
 namespace oms{
 
-//class BaseOrderManager;
+class BaseOrderManager;
 
 template <typename T>
 struct IOrderPtrRef{
@@ -43,7 +43,7 @@ class IOrderPtrType{
 
 	}
 
-	//friend class BaseOrderManager;
+	friend class BaseOrderManager;
 
 public:
 

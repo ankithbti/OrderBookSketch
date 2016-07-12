@@ -26,7 +26,7 @@ protected:
 	}
 public:
 
-	IExchangeSession(){
+	virtual ~IExchangeSession(){
 
 	}
 
