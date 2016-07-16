@@ -72,7 +72,7 @@ public:
 		return false;
 	}
 
-	void disconnect(bool reconnect){
+	void disconnect(bool reconnect = false){
 		::shutdown(_socketFileDesc, SHUT_RDWR);
 		struct timeval tv;
 		tv.tv_sec = 1;
@@ -80,6 +80,9 @@ public:
 		::select(0, NULL, NULL, NULL, &tv);
 		::close(_socketFileDesc);
 		_socketFileDesc = -1;
+		if(reconnect){
+			connect();
+		}
 	}
 
 	inline bool isConnected() const {

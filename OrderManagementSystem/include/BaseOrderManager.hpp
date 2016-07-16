@@ -33,8 +33,6 @@ public:
 	virtual ICancelOrderPtr getCancelOrder() ;
 	virtual IReplaceOrderPtr getReplaceOrder();
 
-protected:
-
 	virtual void putOrder(IOrder*) ;
 	virtual void putCancelOrder(ICancelOrder*) ;
 	virtual void putReplaceOrder(IReplaceOrder*) ;

@@ -6,6 +6,7 @@
  */
 
 #include <BaseOrderManager.hpp>
+#include <IOrderPtrType.hpp>
 
 namespace oms{
 
@@ -57,16 +58,17 @@ void BaseOrderManager::initOrderPool(int orderPoolSize){
 IOrderPtr BaseOrderManager::getOrder(){
 	obLib::SpinGuard lock(_orderLock);
 	BaseOrder* order = _orderList;
+	boost::function<void (IOrder*)> func(boost::bind(&BaseOrderManager::putOrder, this, _1));
 	if(order->_next != NULL){
 		_orderList = _orderList->_next;
-		return IOrderPtr(order, std::bind(&BaseOrderManager::putOrder, this, _1));
+		return IOrderPtrType<IOrder>(order, func);
 	}
-	return IOrderPtr(order->clone(), std::bind(&BaseOrderManager::putOrder, this, _1));
+	return IOrderPtrType<IOrder>(order->clone(), func);
 }
 
 void BaseOrderManager::putOrder(IOrder* order){
 	obLib::SpinGuard lock(_orderLock);
-	register BaseOrder* baseOrder = static_cast<BaseOrder *>(order);
+	BaseOrder* baseOrder = static_cast<BaseOrder *>(order);
 	baseOrder->_next = _orderList;
 	_orderList = baseOrder;
 }

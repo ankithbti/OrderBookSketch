@@ -18,10 +18,11 @@ class BaseOrderManager;
 template <typename T>
 struct IOrderPtrRef{
 private:
-	using DeleterFunc = std::function<void (T*)>;
+	using DeleterFunc = boost::function<void (T*)>;
 public:
 
 	T* _order;
+	//std::function<void (T*)> _deleter;
 	DeleterFunc _deleter;
 
 	explicit IOrderPtrRef(T* o, const DeleterFunc& d) : _order(o), _deleter(d){
@@ -32,22 +33,25 @@ public:
 template<typename T>
 class IOrderPtrType{
 
-	using DeleterFunc = std::function<void (T*)>;
+	using DeleterFunc = boost::function<void (T*)>;
 	T* _order;
 	DeleterFunc _deleter;
+
 
 	void operator == (const IOrderPtrType& ) const ;
 	void operator != (const IOrderPtrType& ) const ;
 
-	explicit IOrderPtrType(T* order, const DeleterFunc& deleter) : _order(order), _deleter(deleter){
+	friend class BaseOrderManager;
+
+	explicit IOrderPtrType(T* order,  DeleterFunc const& deleter) : _order(order), _deleter(deleter){
 
 	}
 
-	friend class BaseOrderManager;
+
 
 public:
 
-	IOrderPtrType(const IOrderPtrType& u ) : _order(u.release()), _deleter(u._deleter){
+	IOrderPtrType(const IOrderPtrType<T>& u ) : _order(u.get()), _deleter(u._deleter){
 
 	}
 

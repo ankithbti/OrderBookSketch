@@ -9,7 +9,7 @@
 
 namespace oms{
 
-int createConnection(const std::string& host, const std::string& port, bool noDelay, bool nonBlock,
+int SocketUtils::createConnection(const std::string& host, const std::string& port, bool noDelay, bool nonBlock,
 		int socketBufferSize, int connectionTimeout){
 
 	int sd;
@@ -95,14 +95,14 @@ int createConnection(const std::string& host, const std::string& port, bool noDe
 	::perror("Not able to connect.");
 	return -1;
 }
-int getSocketRecvBufferSize(int sd){
+int SocketUtils::getSocketRecvBufferSize(int sd){
 	int socketBufferSize = 0;
 	socklen_t size = sizeof(socketBufferSize);
 	int rv = getsockopt(sd, SOL_SOCKET, SO_RCVBUF, (void*)&socketBufferSize, &size);
 	return (rv != -1) ? socketBufferSize : -1;
 
 }
-int getSocketSendBufferSize(int sd){
+int SocketUtils::getSocketSendBufferSize(int sd){
 	int socketBufferSize = 0;
 	socklen_t size = sizeof(socketBufferSize);
 	int rv = getsockopt(sd, SOL_SOCKET, SO_SNDBUF, (void*)&socketBufferSize, &size);

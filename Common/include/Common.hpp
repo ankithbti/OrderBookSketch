@@ -25,6 +25,7 @@
 #include <fstream>
 #include <atomic>
 #include <stack>
+#include <deque>
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -41,7 +42,8 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/foreach.hpp>
-
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 namespace obLib{
 
 #define LOG(m) \

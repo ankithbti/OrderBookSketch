@@ -13,6 +13,13 @@ CXX=/usr/bin/g++
 CXXFLAGS=-g -O2 -std=c++11 -Wall $(INCS)
 
 SRCS = \
+	ExchangeSession.cpp \
+	BaseOrderManager.cpp \
+	SocketUtils.cpp \
+	NSEOrderManager.cpp \
+	NSEMessageConverter.cpp \
+	ExchangeSessionFactory.cpp \
+	NSESession.cpp \
 
 MAIN_SRC = Main.cpp
 

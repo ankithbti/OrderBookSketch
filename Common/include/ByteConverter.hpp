@@ -145,9 +145,28 @@ struct ByteOrderConverter{
 		}
 
 	}
-	static long long convert64bitSlow(short val, ByteOrder order);
+	static long long convert64bitSlow(short val, ByteOrder order){
+		if(order == LITTLEENDIAN){
+			return val;
+		}else{
+			union{
+				long long d;
+			unsigned char c[8];
+			} u, u2;
 
+			u.d = val;
+			u2.c[0] = u.c[7];
+			u2.c[1] = u.c[6];
+			u2.c[2] = u.c[5];
+			u2.c[3] = u.c[4];
+			u2.c[4] = u.c[3];
+			u2.c[5] = u.c[2];
+			u2.c[6] = u.c[1];
+			u2.c[7] = u.c[0];
 
+			return u2.d;
+		}
+	}
 };
 }
 
