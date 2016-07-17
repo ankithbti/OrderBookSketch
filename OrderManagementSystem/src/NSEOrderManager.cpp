@@ -21,6 +21,10 @@ NSEOrderManager::~NSEOrderManager(){
 
 }
 
+void NSEOrderManager::init(const std::string& configStr){
+
+}
+
 IOrder* NSEOrderManager::createOrder() {
 	return new NSEOrder(this);
 }

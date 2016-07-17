@@ -55,6 +55,7 @@ public:
 
 	virtual ~NSEOrderManager();
 
+	virtual void init(const std::string& configStr);
 	virtual IOrder* createOrder() ;
 	virtual ICancelOrder* createCancelOrder();
 	virtual IReplaceOrder* createReplaceOrder() ;

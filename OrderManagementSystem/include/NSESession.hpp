@@ -22,6 +22,7 @@ protected:
 
 	ITradeDefinitionPtr _tradeDef;
 	obLib::SpinLock _spinMutex;
+	obLib::SpinLock _spinIncomingMsgQMutex;
 	std::string _senderSubId;
 	std::string _memberName;
 	std::string _user;
@@ -42,6 +43,9 @@ private:
 	boost::asio::io_service _ioService;
 	boost::asio::io_service::work _ioWork;
 	boost::shared_ptr<boost::thread> _worker;
+
+	typedef std::map<obLib::SeqNo, NSEMessagePtr> InComingMsgQ;
+	InComingMsgQ _incomingMsgQ;
 
 public:
 	NSESession(const std::string& name);
@@ -67,6 +71,40 @@ public:
 
 protected:
 
+	void processIncomingMsgQ(){
+		try{
+			NSEMessagePtr msg;
+			while(retreiveMsgFromIncomingQ(getNextInSeqNum(), msg)){
+				char msgType = msg->getMsgType();
+				// handle this msg
+				(this->*(_msgHandler[msgType]))(msg);
+			}
+		}catch(...){
+
+		}
+	}
+
+	void queueIncomingMsg(obLib::SeqNo seqNo, NSEMessagePtr msg){
+		obLib::SpinGuard lock(_spinIncomingMsgQMutex);
+		_incomingMsgQ[seqNo] = msg;
+	}
+
+	bool retreiveMsgFromIncomingQ(obLib::SeqNo seqNo, NSEMessagePtr& msg){
+		obLib::SpinGuard lock(_spinIncomingMsgQMutex);
+		InComingMsgQ::iterator it = _incomingMsgQ.find(seqNo);
+		if(it != _incomingMsgQ.end()){
+			msg = it->second;
+			_incomingMsgQ.erase(it);
+			return true;
+		}
+		return false;
+	}
+
+	void clearIncomingMsgQ(){
+		_incomingMsgQ.clear();
+	}
+
+	virtual void disconnect();
 	virtual size_t fillLogonMsg(char* buf, size_t len) ;
 	virtual size_t fillLogoutMsg(char* buf, size_t len);
 	virtual size_t fillHeartbeatMsg(char* buf, size_t len);
@@ -76,13 +114,13 @@ protected:
 	virtual void processInMessage(const char* buf, size_t len) ;
 
 
-	void fillMsgField(const char * buff, int offset, int bytes, void* data);
+	void fillMsgField(char * buff, int offset, int bytes, void* data);
 
 	inline obLib::SeqNo getNextOutgoingSeqNo() {
 		return _outSeqNo++;
 	}
 
-	virtual void disconnect();
+
 	void inithandlers();
 	bool sendRawFillOrigSendingTime(char * buf, size_t bufSize, size_t origSendingTimeOffset);
 
@@ -100,8 +138,6 @@ protected:
 	void processHeartBeat(NSEMessagePtr msg);
 	void processTrade(NSEMessagePtr msg);
 	void processReject(NSEMessagePtr msg);
-
-	// To Do
 
 };
 using NSESessionPtr = std::shared_ptr<NSESession>;
