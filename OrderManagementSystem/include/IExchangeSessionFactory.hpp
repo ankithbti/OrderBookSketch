@@ -14,13 +14,12 @@
 namespace oms{
 class IExchangeSessionFactory{
 protected:
-	IExchangeSessionFactory(){
-	}
-
 	IExchangeSessionFactory(const IExchangeSessionFactory& ){
 
 	}
 
+	IExchangeSessionFactory(){
+	}
 public:
 	virtual ~IExchangeSessionFactory(){
 

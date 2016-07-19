@@ -12,22 +12,6 @@
 
 namespace oms{
 
-enum OrderSide{
-	BUY=0,
-	SELL=1,
-	SELL_SHORT=2
-};
-
-enum TimeInForce{
-	DAY,
-	GTC,
-	OPG, // At the Opening
-	IOC,
-	FOK,
-	GTX, // good till crossing
-	GTD
-};
-
 class IExchangeSession;
 
 class IOrder{

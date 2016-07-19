@@ -91,7 +91,7 @@ public:
 	virtual std::string getAccount() const  = 0;
 	virtual std::string getExchangeTradeTime() const  = 0;
 	virtual std::string getExchangeProductId() const = 0;
-	virtual char getSide() const  = 0;
+	virtual TradeSide getSide() const  = 0;
 	virtual double getPrice() const  = 0;
 	virtual int getQty() const  = 0;
 	virtual char getExecType() const  = 0;
