@@ -9,6 +9,7 @@
 #define ORDERMANAGEMENTSYSTEM_INCLUDE_IORDER_HPP_
 
 #include <Common.hpp>
+#include <adaptorLayer/EnumTypes.hpp>
 
 namespace oms{
 

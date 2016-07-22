@@ -39,7 +39,7 @@ protected:
 	IExchangeMessageConverterPtr _messageConverter;
 
 private:
-	std::deque<NSEOrderManagerPtr> _orderManagers;
+	std::deque<IOrderManager*> _orderManagers;
 	boost::asio::io_service _ioService;
 	boost::asio::io_service::work _ioWork;
 	boost::shared_ptr<boost::thread> _worker;
@@ -54,7 +54,7 @@ public:
 	virtual void init(const std::string& strConfig);
 	virtual void shutdown();
 
-	virtual IOrderManagerPtr getOrderManager(size_t symbolNum);
+	virtual IOrderManager* getOrderManager(size_t symbolNum);
 	virtual size_t registerSymbol(const ISymbolDefinitionPtr &);
 
 	virtual bool sendRaw(char * buf, size_t bufSize);

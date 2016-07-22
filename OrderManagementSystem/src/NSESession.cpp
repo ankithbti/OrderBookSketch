@@ -30,7 +30,8 @@ NSESession::~NSESession(){
 	_worker->join();
 }
 
-void NSESession::init(const std::string& configStr) : _configPx(configStr){
+void NSESession::init(const std::string& configStr) {
+	_configPx = configStr;
 	// UserName
 	// Pass
 	// TraderName
@@ -45,7 +46,7 @@ void NSESession::shutdown(){
 	sendLogout();
 }
 
-IOrderManagerPtr NSESession::getOrderManager(size_t symbolNum){
+IOrderManager* NSESession::getOrderManager(size_t symbolNum){
 	return _orderManagers[symbolNum];
 }
 
@@ -61,8 +62,11 @@ size_t NSESession::registerSymbol(const ISymbolDefinitionPtr & symDef ){
 bool NSESession::sendRaw(char * buf, size_t bufSize){
 	// Locking the Socket for sending packet
 	obLib::SpinGuard lock(_spinMutex);
+
+	// Fill the Pkt fields [ Len + SeqNo + ChkSum ] at their offsets [ 0, 2, 6, ] + Msg
 	unsigned long seqNum = getAndIncrNextOutSeqNum();
 	fillMsgField(buf, _seqNoOffset, getSeqNoLen(), (void*)&seqNum);
+
 
 	return sendMsg(buf, bufSize);
 }

@@ -13,6 +13,7 @@
 #include <adaptorLayer/EnumTypes.hpp>
 #include <adaptorLayer/SessionListenerI.hpp>
 #include <adaptorLayer/SymbolDefinitionFactory.hpp>
+#include <adaptorLayer/Security.hpp>
 
 namespace oms{
 

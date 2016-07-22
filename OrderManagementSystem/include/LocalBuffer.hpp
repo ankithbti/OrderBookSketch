@@ -106,7 +106,7 @@ class LocalBuffer{
 	obLib::ByteOrderConverter::ByteOrder _endianType;
 
 public:
-	LocalBuffer(const size_t& size, obLib::ByteOrderConverter::ByteOrder byteOrder) :
+	LocalBuffer(const size_t& size, obLib::ByteOrderConverter::ByteOrder byteOrder = obLib::ByteOrderConverter::LITTLEENDIAN) :
 		_buffer(NULL), _bufferSize(size), _positionInBuffer(0), _endianType(byteOrder){
 		_buffer = (char*)malloc(_bufferSize*sizeof(char));
 		if(_buffer == NULL){

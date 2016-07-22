@@ -111,8 +111,8 @@ public:
 	virtual std::string getExchangeProductId() const {
 		return std::string();
 	}
-	virtual char getSide() const {
-		return '1';
+	virtual oms::TradeSide getSide() const {
+		return TRADE_BUY;
 	}
 	virtual double getPrice() const {
 		return 0.0;

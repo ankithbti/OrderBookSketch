@@ -77,7 +77,7 @@ public:
 	virtual bool send(ICancelOrderPtr) = 0;
 	virtual bool send(IReplaceOrderPtr) = 0;
 	virtual size_t registerSymbol(const ISymbolDefinitionPtr &) = 0;
-	virtual IOrderManagerPtr getOrderManager(size_t symbolNum) = 0;
+	virtual IOrderManager* getOrderManager(size_t symbolNum) = 0;
 	/////////////////////
 
 	virtual bool sendRaw(char * buf, size_t bufSize) = 0;

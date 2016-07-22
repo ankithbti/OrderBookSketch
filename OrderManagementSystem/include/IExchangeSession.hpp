@@ -43,7 +43,7 @@ public:
 
 	virtual size_t registerSymbol(const ISymbolDefinitionPtr &) = 0;
 
-	virtual IOrderManagerPtr getOrderManager(size_t symbolNum) = 0;
+	virtual IOrderManager* getOrderManager(size_t symbolNum) = 0;
 };
 using IExchangeSessionPtr = std::shared_ptr<IExchangeSession>;
 

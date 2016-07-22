@@ -10,6 +10,57 @@
 
 namespace oms{
 
+using PktLen = uint16_t; // 2 bytes
+using PktSeqNo = uint32_t; // 4 bytes
+using PktChkSum = char[16]; // 16 bytes
+
+enum PktOffset{
+	PKT_LEN_OFFSET = 0,
+	PKT_SEQNO_OFFSET = 2,
+	PKT_CHECKSUM_OFFSET = 6
+};
+
+
+using ApiTCode = int16_t; // 2
+using ApiFuncId = int16_t; // 2
+using LogTime = int32_t; // 4
+using AlphaChar = int16_t; // 2
+using TransactionCode = int16_t; // 2
+using ErrorCode = int16_t; // 2
+using TimeStamp = char[8]; // 8
+using MsgLen = uint16_t; // 2 bytes
+
+const TransactionCode TC_LOGON_REQ = 2300;
+const TransactionCode TC_LOGON_RES = 2301;
+const TransactionCode TC_HEARTBEAT = 23506;
+const TransactionCode TC_LOGOFF_REQ = 2320;
+const TransactionCode TC_LOGOFF_RES = 2321;
+const TransactionCode TC_SYSTEM_INFO_REQ = 1600;
+const TransactionCode TC_SYSTEM_INFO_RES = 1601;
+const TransactionCode TC_ORDER_ENTRY_REQ = 2000;
+
+using UserId = int32_t;
+using Password = char[8];
+using TraderName = char[26];
+using LastPwdChangeDate = int32_t;
+using BrokerId = char[5];
+using Reserved = char;
+using BranchId = int16_t;
+using VersionNumber = int32_t;
+using Batch2StartTime = int32_t;
+using HostSwitchContext = char;
+using Colour = char[50];
+using UserType = int16_t;
+using SequenceNumber = double;
+using WsClassName = char[14];
+using BrokerStatus = char;
+using ShowIndex = char;
+using MemberType = int16_t;
+using ClearingStatus = char;
+using BrokerName = char[25];
+
+
+
 enum RejectReason{
 	WRONG_PRICE_TICK,
 	EXCEED_QTY_ALLOWED,
@@ -51,8 +102,8 @@ enum ProductType{
 };
 
 enum SystemSource{
-	MANUAL,
-	ATM
+	SYSTEM_MANUAL,
+	SYSTEM_ATM
 };
 
 enum SessionType{
@@ -109,17 +160,17 @@ enum TradeMsgType{
 };
 
 enum TradeSource{
-	QUOTE,
-	ATM,
-	GUI,
-	EXCHANGE
+	TRADE_QUOTE,
+	TRADE_ATM,
+	TRADE_GUI,
+	TRADE_EXCHANGE
 };
 
 enum TradeSide{
-	BUY,
-	SELL,
-	SHORT_SELL,
-	UNKNOWN
+	TRADE_BUY,
+	TRADE_SELL,
+	TRADE_SHORT_SELL,
+	TRADE_UNKNOWN
 };
 
 }
