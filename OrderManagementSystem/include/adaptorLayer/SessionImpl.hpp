@@ -9,11 +9,12 @@
 #define ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_SESSIONIMPL_HPP_
 
 
+#include <adaptorLayer/Dictionary.hpp>
 #include <IExchangeSessionCallback.hpp>
 #include <adaptorLayer/EnumTypes.hpp>
 #include <adaptorLayer/SessionListenerI.hpp>
 #include <adaptorLayer/SymbolDefinitionFactory.hpp>
-#include <adaptorLayer/Security.hpp>
+#include <adaptorLayer/DictionaryImpl.hpp>
 
 namespace oms{
 
@@ -25,18 +26,18 @@ public:
 
 	// The upper layer [ Strategy ] will call willSend to notify the session layet that an order
 	// can be sent in future for these Dictionaries...be Prepared
-	virtual void willSendOrder(const DictionaryInstrument::SharedPtr& ) = 0;
-	virtual void willSendOrder(const DictionaryProduct::SharedPtr& ) = 0;
+	virtual void willSendOrder(const DictionaryInstrumentPtr& ) = 0;
+	virtual void willSendOrder(const DictionaryProductPtr& ) = 0;
 
 	// Subscription for getting trades is on Instrument Level
 	// Should be subscribe before connection is made
-	virtual void subscribeOrderTrade(const DictionaryProduct::SharedPtr&) = 0;
-	virtual void subscribeOrderTrade(const DictionaryInstrument::SharedPtr&) = 0;
+	virtual void subscribeOrderTrade(const DictionaryProductPtr&) = 0;
+	virtual void subscribeOrderTrade(const DictionaryInstrumentPtr&) = 0;
 
 	// might be useful in future
-	virtual void startInstrumentOrder(const DictionaryInstrument::SharedPtr& inst,
+	virtual void startInstrumentOrder(const DictionaryInstrumentPtr& inst,
 			const ReqListenerI::SharedPtr&) = 0;
-	virtual void stopInstrumentOrder(const DictionaryInstrument::SharedPtr& inst,
+	virtual void stopInstrumentOrder(const DictionaryInstrumentPtr& inst,
 			const ReqListenerI::SharedPtr&) = 0;
 
 	virtual void sendProductOrder( bool isAtmOrder, OrderOperation,
@@ -44,7 +45,7 @@ public:
 	virtual void sendInstrumentOrder( bool isAtmOrder, OrderOperation,
 			const InstrumentOrderMessageI::SharedPtr&, const ReqListenerI::SharedPtr&) = 0;
 
-	virtual void sendCreateProductRequest(const bool isManual, const DictionaryProduct::SharedPtr&,
+	virtual void sendCreateProductRequest(const bool isManual, const DictionaryProductPtr&,
 			const ReqListenerI::SharedPtr&) = 0;
 };
 
@@ -127,24 +128,24 @@ public:
 	////////////////////////////
 	// The upper layer [ Strategy ] will call willSend to notify the session layet that an order
 	// can be sent in future for these Dictionaries...be Prepared
-	virtual void willSendOrder(const DictionaryInstrument::SharedPtr& ) {
+	virtual void willSendOrder(const DictionaryInstrumentPtr& ) {
 		// Nothing to do here as of now
 	}
-	virtual void willSendOrder(const DictionaryProduct::SharedPtr& ){
+	virtual void willSendOrder(const DictionaryProductPtr& ){
 		// Nothing to do here as of now
 	}
 
-	virtual void subscribeOrderTrade(const DictionaryInstrument::SharedPtr&){
+	virtual void subscribeOrderTrade(const DictionaryInstrumentPtr&){
 		// Nothing to do here as of now
 	}
-	virtual void subscribeOrderTrade(const DictionaryProduct::SharedPtr&){
+	virtual void subscribeOrderTrade(const DictionaryProductPtr&){
 		// Nothing to do here as of now
 	}
-	virtual void startInstrumentOrder(const DictionaryInstrument::SharedPtr& inst,
+	virtual void startInstrumentOrder(const DictionaryInstrumentPtr& inst,
 			const ReqListenerI::SharedPtr&) {
 		// Nothing to do here as of now
 	}
-	virtual void stopInstrumentOrder(const DictionaryInstrument::SharedPtr& inst,
+	virtual void stopInstrumentOrder(const DictionaryInstrumentPtr& inst,
 			const ReqListenerI::SharedPtr&) {
 		// Nothing to do here as of now
 	}
@@ -181,7 +182,7 @@ public:
 
 
 	virtual void sendCreateProductRequest(const bool isManual,
-			const DictionaryProduct::SharedPtr&, const ReqListenerI::SharedPtr&) ;
+			const DictionaryProductPtr&, const ReqListenerI::SharedPtr&) ;
 	////////////////////////////
 
 	////////////////////////////
@@ -213,13 +214,13 @@ public:
 	}
 
 	/// Helper functions
-	ProductOrderMessageI::SharedPtr createProductOrderMessage(const DictionaryProduct::SharedPtr& prod,
+	ProductOrderMessageI::SharedPtr createProductOrderMessage(const DictionaryProductPtr& prod,
 			OrderOperation op, TimeInForce tif, OrderSource source){
 		ISymbolDefinitionPtr symDef = _symDefFactory->createSymDef(prod);
 		size_t symbolId = _session->registerSymbol(symDef);
 
 		IOrderManagerPtr orderMgr = _session->getOrderManager(symbolId);
-		return ProductOrderMessageI::SharedPtr(new ProductOrderMessageImpl(orderMgr, symDef->getSecDesc(), source));
+		return ProductOrderMessageI::SharedPtr(new ProductOrderMessageImpl(orderMgr, symDef->getSymbol(), source));
 	}
 
 protected:

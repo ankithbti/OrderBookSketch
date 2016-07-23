@@ -10,6 +10,7 @@
 
 
 #include <Common.hpp>
+#include <adaptorLayer/EnumTypes.hpp>
 
 namespace oms{
 
@@ -28,15 +29,17 @@ public:
 
 	}
 
-	virtual const std::string& getSymbol() const = 0;
-	virtual const std::string& getSecurityId() const = 0;
-	virtual const std::string& getSourceId() const = 0;
-	virtual const std::string& getSecType() const = 0;
-	virtual const std::string& getSecDesc() const = 0;
+	virtual const StreamId& getStreamId() const = 0;
+	virtual const TokenNumber& getTokenNumber() const = 0;
+	virtual const Symbol& getSymbol() const = 0;
+	virtual const Instrument& getInstrument() const = 0;
+	virtual const ExpiryDate& getExpiryDate() const = 0;
+	virtual const StrikePrice& getStrikePrice() const = 0;
+	virtual const OptionType& getOptionType() const = 0;
 	virtual const std::string& getExchange() const = 0;
 	virtual const std::string& getCurr() const = 0;
-	virtual const std::string& getPriceMultiplier() const = 0;
-	virtual const std::string& getPricePrecision() const = 0;
+	virtual const double& getPriceMultiplier() const = 0;
+	virtual const size_t& getPricePrecision() const = 0;
 };
 
 using ISymbolDefinitionPtr = std::shared_ptr<ISymbolDefinition>;
@@ -55,16 +58,6 @@ public:
 	virtual ~ISymbolDefinitionBuilder(){
 
 	}
-
-	virtual void setSymbol() = 0;
-	virtual void setSecurityId() = 0;
-	virtual void setSourceId()= 0;
-	virtual void setSecType() = 0;
-	virtual void setSecDesc() = 0;
-	virtual void setExchange() = 0;
-	virtual void setCurr() = 0;
-	virtual void setPriceMultiplier() = 0;
-	virtual void setPricePrecision() = 0;
 
 	virtual ISymbolDefinitionPtr build() = 0;
 

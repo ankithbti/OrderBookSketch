@@ -18,15 +18,28 @@
 
 namespace obLib{
 
-class MktDataSecurity{
+class MktDataDictionaryOptMsg{
+public:
 	int16_t _streamId;
-	int32_t _tokenNumber;
-	char _instrument[6];
-	char _symbol[10];
+
+	std::string _exchange; // exchange Exchange
+	int32_t _tokenNumber; // exchange OptionId
+	char _instrument[6]; // exchange inst Symbol;
+	char _symbol[10]; // exchange Option Symbol
+
+	int _localExchangeId;
+	int _localInstId;
+	int _localOptionId;
+	std::string _localSymbol;
+
 	int32_t _expiryDate; // Expiry date of contract in seconds from 01-Jan-1980 00:00:00
 	int32_t _strikePrice; // in paise
 	char _optionType[2];
+
+
+	// might implement getter / setter
 };
+using MktDataDictionaryOptMsgPtr = std::shared_ptr<MktDataDictionaryOptMsg>;
 
 }
 

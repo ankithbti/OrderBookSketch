@@ -10,6 +10,16 @@
 
 namespace oms{
 
+using StreamId = int16_t;
+using TokenNumber = int32_t;
+using Instrument = char[6];
+using Symbol = char[10];
+using ExpiryDate = int32_t;
+using StrikePrice = int32_t;
+using OptionType = char[2];
+
+
+
 using PktLen = uint16_t; // 2 bytes
 using PktSeqNo = uint32_t; // 4 bytes
 using PktChkSum = char[16]; // 16 bytes

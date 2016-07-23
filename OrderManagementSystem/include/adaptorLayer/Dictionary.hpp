@@ -5,8 +5,8 @@
  *      Author: ankithbti
  */
 
-#ifndef ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_SECURITY_HPP_
-#define ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_SECURITY_HPP_
+#ifndef ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_DICTIONARY_HPP_
+#define ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_DICTIONARY_HPP_
 
 #include <Common.hpp>
 
@@ -38,7 +38,7 @@ public:
 	virtual int getUnderlyingInstId() = 0;
 
 	// Exchange stuff
-	virtual std::string getExchangeInstId() = 0;
+	virtual int getExchangeInstId() = 0;
 
 	virtual int getLotSize() = 0;
 	virtual int getPriceScalingFactor() = 0;
@@ -48,8 +48,8 @@ public:
 	virtual DictionaryUserDataPtr getOrderUserData() = 0;
 
 	// May be we can have serialized Market Data packet in it if we need
-	virtual void setExtra(void*) = 0;
-	virtual void* getExtra() = 0;
+	virtual void setExtra(std::string& extra) = 0;
+	virtual std::string getExtra() = 0;
 
 };
 using DictionaryInstrumentPtr = std::shared_ptr<DictionaryInstrument>;
@@ -64,17 +64,18 @@ public:
 	virtual int getLocalOptId() = 0;
 
 	virtual std::string getExchangeInstId() = 0;
-	virtual std::string getExchangeOptionId() = 0;
+	virtual int getExchangeOptionId() = 0;
 
 	virtual std::string getOptionName() = 0;
 	virtual std::string getRootSymbol() = 0;
 	virtual int getExpirationDateYYYYMMDD() = 0;
 	virtual double getStrike() = 0;
 	virtual bool isCall() = 0;
+	virtual std::string getOptionType() = 0;
 
 	// May be we can have serialized Market Data packet in it if we need
-	virtual void setExtra(void*) = 0;
-	virtual void* getExtra() = 0;
+	virtual void setExtra(std::string& extra) = 0;
+	virtual std::string getExtra() = 0;
 
 };
 using DictionaryOptionPtr = std::shared_ptr<DictionaryOption>;
@@ -102,8 +103,8 @@ public:
 	virtual double getStrike() = 0;
 	virtual bool isCall() = 0;
 
-	virtual void setExtra(void*) = 0;
-	virtual void* getExtra() = 0;
+	virtual void setExtra(std::string& extra) = 0;
+	virtual std::string getExtra() = 0;
 
 };
 using DictionaryLegPtr = std::shared_ptr<DictionaryLeg>;
@@ -124,8 +125,8 @@ public:
 	virtual const std::vector<DictionaryLegPtr>& getLegs() = 0;
 	virtual int getLotSize() = 0;
 
-	virtual void setExtra(void*) = 0;
-	virtual void* getExtra() = 0;
+	virtual void setExtra(std::string& extra) = 0;
+	virtual std::string getExtra() = 0;
 };
 using DictionarySpreadPtr = std::shared_ptr<DictionarySpread>;
 
@@ -134,14 +135,15 @@ public:
 	virtual ~DictionaryProduct(){
 	}
 
+	virtual int getStreamId() = 0;
 	virtual DictionaryInstrumentPtr getInstrumentDict() = 0;
 	virtual bool isSpread() = 0;
 	virtual int getLocalExchangeId() = 0;
 	virtual int getLocalInstId() = 0;
 	virtual int getLocalProductId() = 0;
 
-	virtual std::string getExchangeInstId() = 0;
-	virtual std::string getExchangeProductId() = 0;
+	virtual int getExchangeInstId() = 0;
+	virtual int getExchangeProductId() = 0;
 	virtual std::string getPacketGrouping() = 0;
 
 	virtual DictionaryOptionPtr getOptionDictionary() = 0;
@@ -151,11 +153,11 @@ public:
 	virtual DictionaryUserDataPtr getOrderUserData() = 0;
 
 	// May be we can have serialized Market Data packet in it if we need
-	virtual void setExtra(void*) = 0;
-	virtual void* getExtra() = 0;
+	virtual void setExtra(std::string& extra) = 0;
+	virtual std::string getExtra() = 0;
 
 };
 using DictionaryProductPtr = std::shared_ptr<DictionaryProduct>;
 }
 
-#endif /* ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_SECURITY_HPP_ */
+#endif /* ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_DICTIONARY_HPP_ */
