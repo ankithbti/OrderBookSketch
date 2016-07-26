@@ -11,6 +11,8 @@
 #include <adaptorLayer/MessageInterface.hpp>
 #include <adaptorLayer/SessionImpl.hpp>
 #include <adaptorLayer/ProductOrderMessageImpl.hpp>
+#include <ExchangeSessionFactory.hpp>
+#include <log.hpp>
 
 /// Have an option of ProductUserData in MarketData to store the ProductOrderPoolI::SharedPtr,
 /// which will be set during willSendOrder call [ only once ]
@@ -26,21 +28,21 @@ public:
 
 	}
 
-	virtual SessionI* createSession(SessionType type, SessionListenerI* listener,
+	virtual SessionI* createSession(const SessionType& type, SessionListenerI* listener,
 			const std::string& configProp, const std::string& exchangeTimeZone) = 0;
 
 	virtual ProductOrderMessageI::SharedPtr createProductOrderMessage(SessionI* session,
-			const DictionaryProduct::SharedPtr& prod, OrderOperation op,
+			const DictionaryProductPtr& prod, OrderOperation op,
 			TimeInForce tif, OrderSource source) = 0;
 
 	virtual ProductOrderPoolI::SharedPtr createProductOrderMessagePool(SessionI* session,
-			const DictionaryProduct::SharedPtr& prod,
+			const DictionaryProductPtr& prod,
 			const ProductOrderMessageI::SharedPtr& orderTemplate){
 		return ProductOrderPoolI::SharedPtr();
 	}
 
 	virtual InstrumentOrderMessageI::SharedPtr createInstrumentOrderMessage(SessionI* session,
-			const DictionaryInstrument::SharedPtr& prod, OrderOperation op,
+			const DictionaryInstrumentPtr& prod, OrderOperation op,
 			TimeInForce tif, OrderSource source) = 0;
 
 	// May be for Quotes in Future
@@ -50,11 +52,16 @@ public:
 
 class AdaptorFactory : public FactoryI{
 public:
-	AdaptorFactory();
-	virtual ~AdaptorFactory();
+	AdaptorFactory(){
+		CONSOLELOG(__FUNCTION__ << " Entered");
+	}
+	virtual ~AdaptorFactory(){
 
-	virtual SessionI* createSession(SessionType type, SessionListenerI* listener,
+	}
+
+	virtual SessionI* createSession(const SessionType& type, SessionListenerI* listener,
 			const std::string& configProp, const std::string& exchangeTimeZone) {
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		// Read config parameters
 		// clientOrderIdFile [ mmap ],
 
@@ -66,7 +73,7 @@ public:
 
 		std::string sessionName, sessionType, clientOrderIdFile;
 
-		IExchangeSessionPtr session = sessionFactory->createSession(sessionName, sessionType);
+		IExchangeSession::SharedPtr session = sessionFactory->createSession(sessionName, sessionType);
 		if(!session){
 			throw std::runtime_error(" Can not create the session. ");
 		}
@@ -75,21 +82,24 @@ public:
 	}
 
 	virtual ProductOrderMessageI::SharedPtr createProductOrderMessage(SessionI* session,
-			const DictionaryProduct::SharedPtr& prod, OrderOperation op,
+			const DictionaryProductPtr& prod, OrderOperation op,
 			TimeInForce tif, OrderSource source) {
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		return static_cast<SessionImpl*>(session)->createProductOrderMessage(prod, op, tif, source);
 	}
 
 	virtual ProductOrderPoolI::SharedPtr createProductOrderMessagePool(SessionI* session,
-			const DictionaryProduct::SharedPtr& prod,
+			const DictionaryProductPtr& prod,
 			const ProductOrderMessageI::SharedPtr& orderTemplate){
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		return ProductOrderMessagePoolImpl::SharedPtr(new ProductOrderMessagePoolImpl(
-				std::dynamic_pointer_cast<ProductOrderMessageImpl>(orderTemplate)));
+				static_cast<ProductOrderMessageImpl*>(orderTemplate)));
 	}
 
 	virtual InstrumentOrderMessageI::SharedPtr createInstrumentOrderMessage(SessionI* session,
-			const DictionaryInstrument::SharedPtr& prod, OrderOperation op,
+			const DictionaryInstrumentPtr& prod, OrderOperation op,
 			TimeInForce tif, OrderSource source) {
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		// Not implemented right now
 		return InstrumentOrderMessageI::SharedPtr();
 	}

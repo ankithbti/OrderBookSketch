@@ -100,8 +100,10 @@ protected:
 	virtual void sendTestReq();
 
 	bool sendMsg(char* buf, size_t size){
+		std::cout << " sendMsg - Size: " << size << " , Buf: " << buf << std::endl;
 		if(size && (this->writeMsg(buf, size) == size)){
 			// Successfully Sent the
+			_lastSentTime = time(NULL);
 			return true;
 		}
 		return false;

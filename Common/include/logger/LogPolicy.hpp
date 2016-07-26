@@ -76,7 +76,7 @@ public:
 
 struct ScreenLogPolicy : public LogPolicy
 {
-private:
+public:
 
 	explicit ScreenLogPolicy(const std::string& name = std::string("Default"), const std::string& filePath = std::string("Default")) : LogPolicy(name){
 	}

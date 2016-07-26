@@ -44,7 +44,7 @@ public:
 
 };
 
-using IOrderManagerPtr = std::shared_ptr<IOrderManager>;
+using IOrderManagerPtr = IOrderManager*;
 
 
 }

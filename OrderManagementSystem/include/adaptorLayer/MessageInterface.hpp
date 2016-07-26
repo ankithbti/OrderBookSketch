@@ -90,38 +90,70 @@ public:
 
 class ProductOrderMessageI : public OutgoingMessageI{
 public:
-	typedef std::shared_ptr<ProductOrderMessageI> SharedPtr;
+	typedef ProductOrderMessageI* SharedPtr;
 
-	virtual void setOrderId(int orderId) = 0;
-	virtual void setSide(OrderSide side) = 0;
-	virtual void setType(OrderType type) = 0;
-	virtual void setRestriction(TimeInForce tif) = 0;
-	virtual void setPrice(double price) = 0;
-	virtual void setQty(int qty) = 0;
-	virtual void setResevedQty(int qty) = 0;
-	virtual void setSellShort(bool sellShort) = 0;
+	virtual void setOrderId(int orderId) {
 
-	virtual void setLocalReference(const std::string& ref) = 0;
-	virtual std::string getLocalReference() = 0; // might return ClientOrderId as Local ref
+	}
+	virtual void setSide(OrderSide side) {
 
-	virtual void setClientOrderId(const obLib::OrderId& id) = 0;
-	virtual obLib::OrderId getClientOrderId() = 0; // might return ClientOrderId as Local ref
+	}
+	virtual void setType(OrderType type) {
 
-	virtual void setAcount(const std::string& account) = 0;
-	virtual void setAcountId(int accountId) = 0;
-	virtual void setClearingAccount(const std::string& account) = 0;
+	}
+	virtual void setRestriction(TimeInForce tif) {
 
-	virtual void setExchangeOrderId(const std::string& oid) = 0;
+	}
+	virtual void setPrice(double price) {
 
-	virtual void setExtra(void*);
+	}
+	virtual void setQty(int qty) {
 
-	virtual void setUserName(const std::string& uname) = 0;
-	virtual void setUserId(int uid) = 0;
+	}
+	virtual void setResevedQty(int qty) {
 
-	virtual void setSystemSource(SystemSource source) = 0;
+	}
+	virtual void setSellShort(bool sellShort) {
+
+	}
+
+	virtual void setLocalReference(const std::string& ref) {
+
+	}
+	virtual std::string getLocalReference() {return "";} // might return ClientOrderId as Local ref
+
+	virtual void setClientOrderId(const obLib::OrderId& id){}
+	virtual obLib::OrderId getClientOrderId() {return 0;} // might return ClientOrderId as Local ref
+
+	virtual void setAcount(const std::string& account) {}
+	virtual void setAcountId(int accountId) {}
+	virtual void setClearingAccount(const std::string& account) {}
+
+	virtual void setExchangeOrderId(const std::string& oid) {}
+
+	virtual void setExtra(void*){
+
+	}
+
+	virtual void setUserName(const std::string& uname) {
+
+	}
+	virtual void setUserId(int uid) {
+
+	}
+
+	virtual void setSystemSource(SystemSource source) {
+
+	}
 
 	// To Some last step processing if needed
-	virtual void setComplete() = 0;
+	virtual void setComplete() {
+
+	}
+
+	virtual ProductOrderMessageI::SharedPtr clone() {
+
+	}
 
 };
 

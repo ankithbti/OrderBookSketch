@@ -57,13 +57,26 @@ public:
 
 	void init(const std::string& config){
 		// Read all params from config
+		_host = "127.0.0.1";
+		_port = "8765";
+		_noDelay = true;
+		_nonBlocking = true;
+		_socketBufSize = 1024;
+		_spinReaderThread = false;
+		_connectTimeout = 10;
+		_maxRetries = 5;
+		_reconnectInterval = 10;
+		_selectTimeout = 10;
+		_socketFileDesc = -1;
 	}
 
 	bool connect(){
 		int retry = 0;
 		do{
-			int sd = SocketUtils::createConnection(_host, _port, _noDelay, _nonBlocking, _socketBufSize, _connectTimeout);
+			std::cout << "Going to connect to "<< _host << ":" << _port << " , RetryCount: " << retry << std::endl;
+ 			int sd = SocketUtils::createConnection(_host, _port, _noDelay, _nonBlocking, _socketBufSize, _connectTimeout);
 			if(sd != -1){
+				std::cout << "Connected to "<< _host << ":" << _port << " , RetryCount: " << retry << " , Socket Descriptor: " << sd << std::endl;
 				_socketFileDesc = sd;
 				return true;
 			}
@@ -81,6 +94,7 @@ public:
 		::close(_socketFileDesc);
 		_socketFileDesc = -1;
 		if(reconnect){
+			std::cout << " disconnect - connecting again. " << std::endl;
 			connect();
 		}
 	}
@@ -91,6 +105,9 @@ public:
 
 	inline bool isReadyRead() const{
 		if(_nonBlocking && !_spinReaderThread){
+			if(!isConnected()){
+				return false;
+			}
 			fd_set readset;
 			struct timeval tv = {3,0};
 			FD_ZERO(&readset);
@@ -104,7 +121,9 @@ public:
 			if(rv == 0){
 				return false;
 			}
+			std::cout << " To Read something on socket " << rv << std::endl;
 		}
+
 		return true;
 	}
 
@@ -113,10 +132,12 @@ public:
 		ssize_t bytes_sent = 0;
 		do{
 			ssize_t nbytes = ::send(_socketFileDesc, msg+bytes_sent, size - bytes_sent, 0);
+			std::cout << " ExchangeConnection - writeMsg() - Bytessent: " << nbytes << std::endl;
 			if(nbytes == 0){
 				return -1;
 			}
 			if(nbytes < 0){
+				perror("ExchangeConnection::writeMsg() - Error while write msg: ");
 				if((errno == EWOULDBLOCK) || (errno == EAGAIN) || (errno == EINTR)){
 					// Wait for the socket to be ready before retrying
 					struct timeval tv = {3,0};

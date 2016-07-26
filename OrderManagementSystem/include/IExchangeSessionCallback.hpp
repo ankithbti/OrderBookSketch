@@ -32,9 +32,9 @@ public:
 	virtual void onSessionOpen() = 0;
 	virtual void onSessionClose() = 0;
 
-	virtual void onOrderAck(IOrderAckPtr) = 0;
-	virtual void onOrderReject(IOrderRejectPtr) = 0;
-	virtual void onTrade(ITradePtr) = 0;
+	virtual void onOrderAck(const IOrderAckPtr&) = 0;
+	virtual void onOrderReject(const IOrderRejectPtr&) = 0;
+	virtual void onTrade(const ITrade::SharedPtr&) = 0;
 };
 
 }

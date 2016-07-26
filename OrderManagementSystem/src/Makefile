@@ -32,7 +32,6 @@ INCS = -I../include \
        -I$(BOOST_BASE)/include \
        -I${SPARSE_HASHMAP_BASE}/include \
        -I${TBB_BASE_ROOT}/include \
-       -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 \
 
 LIBS = \
         -L$(BOOST_BASE)/lib -lboost_thread \

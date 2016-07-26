@@ -12,40 +12,25 @@
 
 #include <util/MemoryMapped.hpp>
 #include <LocalBuffer.hpp>
+#include <log.hpp>
+#include <adaptorLayer/AdaptorFactory.hpp>
 
+using namespace oms;
 int main(){
 
+	AdaptorFactoryPtr af = std::make_shared<AdaptorFactory>();
+	SessionListenerI* sl = new DummySessionListener();
+	SessionType st = ORDER_OUTRIGHT;
+	SessionI* session = af->createSession(st, sl, "CONFIG_PROPS", "IND");
+
+	CONSOLELOG(__FUNCTION__ << " Session Created. ");
+	session->start();
 
 
-	char p[10];
-	std::cout << sizeof(p) << std::endl;
+	while(true){
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
 
-
-	oms::StBrokerEligibilityPerMkt brokerEligibility;
-	brokerEligibility.dump();
-	std::cout << std::endl;
-	std::cout << brokerEligibility.isEligibleForAuctionMkt() << std::endl;
-	brokerEligibility.enableAuctionMktEligibility();
-	brokerEligibility.enableNormalMktEligibility();
-	brokerEligibility.dump();
-	std::cout << std::endl;
-
-	std::cout << brokerEligibility.isEligibleForAuctionMkt() << std::endl;
-
-	return 0;
-
-
-	//std::shared_ptr<oms::ExchangeSession> es;
-	oms::LocalBuffer lb(10, obLib::ByteOrderConverter::LITTLEENDIAN);
-	char a = 'A';
-	lb.put8(a);
-	a = 'B';
-	lb.put8(a);
-
-	std::ostringstream ss;
-	lb.toStream(ss);
-
-	std::cout << ss.str();
 	return 0;
 }
 

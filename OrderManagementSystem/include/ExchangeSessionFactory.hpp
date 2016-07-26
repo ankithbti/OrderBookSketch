@@ -19,7 +19,7 @@ public:
 	~ExchangeSessionFactory();
 
 	virtual void init(const std::string& configStr);
-	virtual IExchangeSessionPtr createSession(const std::string& sessionName, const std::string& sessionType);
+	virtual IExchangeSession::SharedPtr createSession(const std::string& sessionName, const std::string& sessionType);
 };
 
 }

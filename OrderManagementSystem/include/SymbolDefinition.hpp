@@ -9,6 +9,7 @@
 #define ORDERMANAGEMENTSYSTEM_INCLUDE_SYMBOLDEFINITION_HPP_
 
 #include <ISymbolDefinition.hpp>
+#include <Common.hpp>
 
 namespace oms{
 
@@ -16,32 +17,32 @@ class SymbolDefinition : public ISymbolDefinition{
 
 	StreamId _streamId;
 	TokenNumber _tokenNo;
-	Instrument _instrument;
-	Symbol _symbol;
+	std::string _instrument;
+	std::string _symbol;
 	ExpiryDate _expiryDate;
 	StrikePrice _strikePrice;
-	OptionType _optionType;
+	std::string _optionType;
 	std::string _exchange;
 	std::string _currency;
 	double _priceMultiplier;
 	size_t _pricePrecision;
 
 public:
-	SymbolDefinition(const short& streamId, const int& tokenNumber, const Instrument& instrument,
-			const Symbol& symbol, ExpiryDate expiryDate, StrikePrice strikePrice, OptionType type,
+	SymbolDefinition(const short& streamId, const int& tokenNumber, const std::string& instrument,
+			const std::string& symbol, ExpiryDate expiryDate, StrikePrice strikePrice, std::string type,
 			const std::string& exchange, const std::string& curr, double priceMultiplier,
 			size_t pricePrecision) : _streamId(streamId),
 			_tokenNo(tokenNumber),
-			memcpy((void*)_instrument, (void*)instrument, sizeof(Instrument)),
-			memcpy((void*)_symbol, (void*)symbol, sizeof(Symbol)),
 			_expiryDate(expiryDate),
 			_strikePrice(strikePrice),
-			memcpy((void*)_optionType, (void*)type, sizeof(OptionType)),
 			_exchange(exchange),
 			_currency(curr),
 			_priceMultiplier(priceMultiplier),
 			_pricePrecision(pricePrecision)
 {
+//		std::memcpy((void*)_instrument, (void*)instrument, sizeof(Instrument));
+//		std::memcpy((void*)_symbol, (void*)symbol, sizeof(Symbol));
+//		std::memcpy((void*)_optionType, (void*)type, sizeof(OptionType));
 }
 
 	virtual const StreamId& getStreamId() const {
@@ -52,11 +53,11 @@ public:
 		return _tokenNo;
 	}
 
-	virtual const Symbol& getSymbol() const {
+	virtual const std::string& getSymbol() const {
 		return _symbol;
 	}
 
-	virtual const Instrument& getInstrument() const {
+	virtual const std::string& getInstrument() const {
 		return _instrument;
 	}
 
@@ -68,7 +69,7 @@ public:
 		return _strikePrice;
 	}
 
-	virtual const OptionType& getOptionType() const {
+	virtual const std::string& getOptionType() const {
 		return _optionType;
 	}
 

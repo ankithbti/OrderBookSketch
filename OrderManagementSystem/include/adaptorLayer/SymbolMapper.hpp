@@ -9,20 +9,27 @@
 #define ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_SYMBOLMAPPER_HPP_
 
 #include <ISymbolDefinition.hpp>
+#include <containers/SpinLock.hpp>
 
 namespace oms{
 
 class SymbolMapper{
 	// Singleton - To Do
 
-	SymbolMapper();
-	SymbolMapper(const SymbolMapper&);
-	SymbolMapper& operator=(const SymbolMapper&);
+	SymbolMapper(){
+
+	}
+	SymbolMapper(const SymbolMapper&){
+
+	}
+	SymbolMapper& operator=(const SymbolMapper&){
+
+	}
 
 	typedef std::map<std::string, ISymbolDefinitionPtr> SymbolContainer;
 
 	SymbolContainer _symbols;
-	obLib::SpinLock _spinMutex;
+	mutable obLib::SpinLock _spinMutex;
 
 public:
 	static SymbolMapper& getInstance(){

@@ -25,6 +25,7 @@ protected:
 
 	}
 public:
+	typedef std::shared_ptr<IExchangeSession> SharedPtr;
 
 	virtual ~IExchangeSession(){
 
@@ -45,7 +46,6 @@ public:
 
 	virtual IOrderManager* getOrderManager(size_t symbolNum) = 0;
 };
-using IExchangeSessionPtr = std::shared_ptr<IExchangeSession>;
 
 }
 

@@ -82,6 +82,7 @@ protected:
 
 	}
 public:
+	typedef std::shared_ptr<ITrade> SharedPtr;
 	virtual ~ITrade(){
 
 	}
@@ -97,7 +98,7 @@ public:
 	virtual int getQty() const  = 0;
 	virtual char getExecType() const  = 0;
 };
-using ITradePtr = std::shared_ptr<ITrade>;
+
 
 }
 

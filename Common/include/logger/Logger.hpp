@@ -157,7 +157,7 @@ public:
 	_isRunning(true),
 	_logContainer(_logPolicy),
 	_loggerThread(&Logger::run, this){
-
+		std::cout << " Log Created. " << std::endl;
 	}
 
 	~Logger(){
@@ -177,13 +177,13 @@ public:
 	void log(const T& t){
 		std::unique_lock<std::mutex> lock(_logMutex);
 		_logContainer.put(t);
-		//_logCV.notify_one();
+		_logCV.notify_one();
 	}
 
 	void log(const char* t){
 		std::unique_lock<std::mutex> lock(_logMutex);
 		_logContainer.put(t);
-		//_logCV.notify_one();
+		_logCV.notify_one();
 	}
 
 	const std::ostream& getStream() const {

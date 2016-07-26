@@ -22,6 +22,7 @@ IExchangeMessagePtr NSEMessageConverter::convert(const char* msgBuff, size_t siz
 	// This is the place where we will parse the message to NSEMessage
 	// This will be used in processInMessage in NSESession
 	// Validation about Len / SeqNo / CheckSum should be done here.
+	return std::shared_ptr<IExchangeMessage>();
 }
 
 }

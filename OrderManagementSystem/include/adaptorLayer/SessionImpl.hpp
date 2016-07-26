@@ -15,6 +15,9 @@
 #include <adaptorLayer/SessionListenerI.hpp>
 #include <adaptorLayer/SymbolDefinitionFactory.hpp>
 #include <adaptorLayer/DictionaryImpl.hpp>
+#include <log.hpp>
+#include <IExchangeSession.hpp>
+#include <adaptorLayer/ProductOrderMessageImpl.hpp>
 
 namespace oms{
 
@@ -26,27 +29,45 @@ public:
 
 	// The upper layer [ Strategy ] will call willSend to notify the session layet that an order
 	// can be sent in future for these Dictionaries...be Prepared
-	virtual void willSendOrder(const DictionaryInstrumentPtr& ) = 0;
-	virtual void willSendOrder(const DictionaryProductPtr& ) = 0;
+	virtual void willSendOrder(const DictionaryInstrumentPtr& ) {
+
+	}
+	virtual void willSendOrder(const DictionaryProductPtr& ) {
+
+	}
 
 	// Subscription for getting trades is on Instrument Level
 	// Should be subscribe before connection is made
-	virtual void subscribeOrderTrade(const DictionaryProductPtr&) = 0;
-	virtual void subscribeOrderTrade(const DictionaryInstrumentPtr&) = 0;
+	virtual void subscribeOrderTrade(const DictionaryProductPtr&) {
+
+	}
+	virtual void subscribeOrderTrade(const DictionaryInstrumentPtr&) {
+
+	}
 
 	// might be useful in future
 	virtual void startInstrumentOrder(const DictionaryInstrumentPtr& inst,
-			const ReqListenerI::SharedPtr&) = 0;
+			const ReqListenerI::SharedPtr&) {
+
+	}
 	virtual void stopInstrumentOrder(const DictionaryInstrumentPtr& inst,
-			const ReqListenerI::SharedPtr&) = 0;
+			const ReqListenerI::SharedPtr&) {
+
+	}
 
 	virtual void sendProductOrder( bool isAtmOrder, OrderOperation,
-			const ProductOrderMessageI::SharedPtr&, const ReqListenerI::SharedPtr&) = 0;
+			const ProductOrderMessageI::SharedPtr&, const ReqListenerI::SharedPtr&) {
+
+	}
 	virtual void sendInstrumentOrder( bool isAtmOrder, OrderOperation,
-			const InstrumentOrderMessageI::SharedPtr&, const ReqListenerI::SharedPtr&) = 0;
+			const InstrumentOrderMessageI::SharedPtr&, const ReqListenerI::SharedPtr&) {
+
+	}
 
 	virtual void sendCreateProductRequest(const bool isManual, const DictionaryProductPtr&,
-			const ReqListenerI::SharedPtr&) = 0;
+			const ReqListenerI::SharedPtr&) {
+
+	}
 };
 
 class QuoteSessionI{
@@ -64,21 +85,34 @@ public:
 
 	virtual int addConnection(ConnectionType, const std::string& ip, const std::string& port,
 			const std::string& traderId, const std::string& userId, const std::string& password,
-			const std::string& configProperties) = 0;
+			const std::string& configProperties) {
+	}
 
-	virtual void connect(int id = -1) = 0;
-	virtual void disconnect(int id = -1) = 0;
+	virtual bool start() {
+		return false;
+	}
 
-	virtual OrderSessionI* getOrderSession() = 0;
+	virtual void connect(int id = -1) {
+
+	}
+	virtual void disconnect(int id = -1) {
+
+	}
+
+	virtual OrderSessionI* getOrderSession() {
+		return NULL;
+	}
 
 	// For Future
-	virtual QuoteSessionI* getQuoteSession() = 0;
+	virtual QuoteSessionI* getQuoteSession() {
+		return NULL;
+	}
 
 };
 
 class SessionImpl : public SessionI, public OrderSessionI, public IExchangeSessionCallback{
 
-	IExchangeSessionPtr _session;
+	IExchangeSession::SharedPtr _session;
 	SessionType _sessionType;
 	SessionListenerI * _sessionListener;
 	bool _isSessionOpen;
@@ -87,7 +121,7 @@ class SessionImpl : public SessionI, public OrderSessionI, public IExchangeSessi
 	SymbolDefFactoryPtr _symDefFactory;
 
 public:
-	SessionImpl(IExchangeSessionPtr session, SessionType type, SessionListenerI* sl,
+	SessionImpl(IExchangeSession::SharedPtr session, SessionType type, SessionListenerI* sl,
 			const std::string& clOrderIdFile,
 			SymbolDefFactoryPtr symbDefFactory) :
 				_session(session),
@@ -95,6 +129,7 @@ public:
 				_sessionListener(sl),
 				_isSessionOpen(false),
 				_symDefFactory(symbDefFactory){
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		_session->setSessionCallback(this);
 	}
 	virtual ~SessionImpl(){
@@ -110,6 +145,13 @@ public:
 		_session->start();
 		return 0;
 	}
+
+	virtual bool start() {
+		_session->init("TEST_CONFIG");
+		_session->start();
+		return true;
+	}
+
 	virtual void connect(int id = -1){
 		// Nothing to do here as of now
 	}
@@ -182,7 +224,9 @@ public:
 
 
 	virtual void sendCreateProductRequest(const bool isManual,
-			const DictionaryProductPtr&, const ReqListenerI::SharedPtr&) ;
+			const DictionaryProductPtr&, const ReqListenerI::SharedPtr&) {
+
+	}
 	////////////////////////////
 
 	////////////////////////////
@@ -202,24 +246,26 @@ public:
 			_isSessionOpen  = false;
 		}
 	}
+
 	virtual void onOrderAck(const IOrderAckPtr& ack) {
 		// Nothing to do here as of now
 	}
 	virtual void onOrderReject(const IOrderRejectPtr& reject){
 		// Nothing to do here as of now
 	}
-	virtual void onTrade(const ITradePtr& trade){
-		TradeImpl::SharedPtr tradeImpl(new TradeImpl(trade));
-		_sessionListener->onOrderTrade(tradeImpl);
+	virtual void onTrade(const ITrade::SharedPtr& trade){
+		//TradeImpl::SharedPtr tradeImpl(new TradeImpl(trade));
+		//_sessionListener->onOrderTrade(tradeImpl);
 	}
 
 	/// Helper functions
 	ProductOrderMessageI::SharedPtr createProductOrderMessage(const DictionaryProductPtr& prod,
 			OrderOperation op, TimeInForce tif, OrderSource source){
+		CONSOLELOG(__FUNCTION__ << " Entered");
 		ISymbolDefinitionPtr symDef = _symDefFactory->createSymDef(prod);
 		size_t symbolId = _session->registerSymbol(symDef);
 
-		IOrderManagerPtr orderMgr = _session->getOrderManager(symbolId);
+		IOrderManager* orderMgr = _session->getOrderManager(symbolId);
 		return ProductOrderMessageI::SharedPtr(new ProductOrderMessageImpl(orderMgr, symDef->getSymbol(), source));
 	}
 
@@ -228,7 +274,7 @@ protected:
 	virtual void sendNewProductOrder(const ProductOrderMessageI::SharedPtr& order,
 			const ReqListenerI::SharedPtr& listener){
 
-		ProductOrderMessageImplPtr productOrder = std::static_pointer_cast<ProductOrderMessageImpl>(order);
+		ProductOrderMessageImplPtr productOrder = static_cast<ProductOrderMessageImpl*>(order);
 
 		obLib::OrderId uniqueOId = 1;
 		productOrder->setClientOrderId(uniqueOId);

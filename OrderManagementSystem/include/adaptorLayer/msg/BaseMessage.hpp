@@ -9,6 +9,7 @@
 #define ORDERMANAGEMENTSYSTEM_INCLUDE_ADAPTORLAYER_MSG_BASEMESSAGE_HPP_
 
 #include <LocalBuffer.hpp>
+#include <adaptorLayer/EnumTypes.hpp>
 
 namespace oms{
 
@@ -123,7 +124,6 @@ public:
 class BaseMessage{
 protected:
 	size_t _initSize;
-	BaseMsgHeader _header;
 public:
 	BaseMessage(size_t size = 2048) : _initSize(size){
 	}
@@ -170,64 +170,64 @@ protected:
 
 public:
 	const ApiTCode& getApiTCode() const{
-		return _msgHeader._apiTCode;
+		return _msgHeader.getApiTCode();
 	}
 	void setApiTCode(const ApiTCode& apiTCode){
-		_msgHeader._apiTCode = apiTCode;
+		_msgHeader.setApiTCode(apiTCode);
 	}
 
 	const ApiFuncId& getApiFuncId() const{
-		return _msgHeader._apiFuncId;
+		return _msgHeader.getApiFuncId();
 	}
 	void setApiFuncId(const ApiFuncId& apiFuncId){
-		_msgHeader._apiFuncId = apiFuncId;
+		_msgHeader.setApiFuncId(apiFuncId);
 	}
 
 	const LogTime& getLogTime() const {
-		return _msgHeader._logTime;
+		return _msgHeader.getLogTime();
 	}
 	void setLogTime(const LogTime& logTime){
-		_msgHeader._logTime = logTime;
+		_msgHeader.setLogTime(logTime);
 	}
 
 	const AlphaChar& getAlphaChar() const {
-		return _msgHeader._alphaChar;
+		return _msgHeader.getAlphaChar();
 	}
 	void setAlphaChar(const AlphaChar& ac){
-		_msgHeader._alphaChar = ac;
+		_msgHeader.setAlphaChar(ac);
 	}
 
 	const TransactionCode& getTransactionCode() const {
-		return _msgHeader._transactionCode;
+		return _msgHeader.getTransactionCode();
 	}
 	void setTransactionCode(const TransactionCode& tc){
-		_msgHeader._transactionCode = tc;
+		_msgHeader.setTransactionCode(tc);
 	}
 
 	const ErrorCode& getErrorCode() const {
-		return _msgHeader._errCode;
+		return _msgHeader.getErrorCode();
 	}
 	void setErrorCode(const ErrorCode& ec){
-		_msgHeader._errCode = ec;
+		_msgHeader.setErrorCode(ec);
 	}
 
 	const TimeStamp& getTimeStamp() const {
-		return _msgHeader._timeStamp;
+		return _msgHeader.getTimeStamp();
 	}
 
 	const TimeStamp& getTimeStamp1() const {
-		return _msgHeader._timeStamp1;
+		return _msgHeader.getTimeStamp1();
 	}
 
 	const TimeStamp& getTimeStamp2() const {
-		return _msgHeader._timeStamp2;
+		return _msgHeader.getTimeStamp2();
 	}
 
 	const MsgLen& getMsgLen() const {
-		return _msgHeader._msgLen;
+		return _msgHeader.getMsgLen();
 	}
 	void setMsgLen(const MsgLen& len){
-		_msgHeader._msgLen = len;
+		_msgHeader.setMsgLen(len);
 	}
 
 	RequestBaseMessage(size_t size = 2048) : BaseMessage(size){
@@ -248,64 +248,64 @@ protected:
 
 public:
 	const ApiTCode& getApiTCode() const{
-		return _msgHeader._apiTCode;
+		return _msgHeader.getApiTCode();
 	}
 	void setApiTCode(const ApiTCode& apiTCode){
-		_msgHeader._apiTCode = apiTCode;
+		_msgHeader.setApiTCode(apiTCode);
 	}
 
 	const ApiFuncId& getApiFuncId() const{
-		return _msgHeader._apiFuncId;
+		return _msgHeader.getApiFuncId();
 	}
 	void setApiFuncId(const ApiFuncId& apiFuncId){
-		_msgHeader._apiFuncId = apiFuncId;
+		_msgHeader.setApiFuncId(apiFuncId);
 	}
 
 	const LogTime& getLogTime() const {
-		return _msgHeader._logTime;
+		return _msgHeader.getLogTime();
 	}
 	void setLogTime(const LogTime& logTime){
-		_msgHeader._logTime = logTime;
+		_msgHeader.setLogTime(logTime);
 	}
 
 	const AlphaChar& getAlphaChar() const {
-		return _msgHeader._alphaChar;
+		return _msgHeader.getAlphaChar();
 	}
 	void setAlphaChar(const AlphaChar& ac){
-		_msgHeader._alphaChar = ac;
+		_msgHeader.setAlphaChar(ac);
 	}
 
 	const TransactionCode& getTransactionCode() const {
-		return _msgHeader._transactionCode;
+		return _msgHeader.getTransactionCode();
 	}
 	void setTransactionCode(const TransactionCode& tc){
-		_msgHeader._transactionCode = tc;
+		_msgHeader.setTransactionCode(tc);
 	}
 
 	const ErrorCode& getErrorCode() const {
-		return _msgHeader._errCode;
+		return _msgHeader.getErrorCode();
 	}
 	void setErrorCode(const ErrorCode& ec){
-		_msgHeader._errCode = ec;
+		_msgHeader.setErrorCode(ec);
 	}
 
 	const TimeStamp& getTimeStamp() const {
-		return _msgHeader._timeStamp;
+		return _msgHeader.getTimeStamp();
 	}
 
 	const TimeStamp& getTimeStamp1() const {
-		return _msgHeader._timeStamp1;
+		return _msgHeader.getTimeStamp1();
 	}
 
 	const TimeStamp& getTimeStamp2() const {
-		return _msgHeader._timeStamp2;
+		return _msgHeader.getTimeStamp2();
 	}
 
 	const MsgLen& getMsgLen() const {
-		return _msgHeader._msgLen;
+		return _msgHeader.getMsgLen();
 	}
 	void setMsgLen(const MsgLen& len){
-		_msgHeader._msgLen = len;
+		_msgHeader.setMsgLen(len);
 	}
 
 	NormalResponseBaseMessage(size_t size = 2048) : BaseMessage(size){

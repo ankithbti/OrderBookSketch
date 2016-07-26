@@ -31,11 +31,11 @@ public:
 
 	virtual const StreamId& getStreamId() const = 0;
 	virtual const TokenNumber& getTokenNumber() const = 0;
-	virtual const Symbol& getSymbol() const = 0;
-	virtual const Instrument& getInstrument() const = 0;
+	virtual const std::string& getSymbol() const = 0;
+	virtual const std::string& getInstrument() const = 0;
 	virtual const ExpiryDate& getExpiryDate() const = 0;
 	virtual const StrikePrice& getStrikePrice() const = 0;
-	virtual const OptionType& getOptionType() const = 0;
+	virtual const std::string& getOptionType() const = 0;
 	virtual const std::string& getExchange() const = 0;
 	virtual const std::string& getCurr() const = 0;
 	virtual const double& getPriceMultiplier() const = 0;

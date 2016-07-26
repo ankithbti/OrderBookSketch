@@ -11,6 +11,7 @@
 
 #include <adaptorLayer/Dictionary.hpp>
 #include <SymbolDefinition.hpp>
+#include <adaptorLayer/SymbolMapper.hpp>
 
 namespace oms{
 
@@ -34,7 +35,7 @@ public:
 		ISymbolDefinitionPtr symDef(new SymbolDefinition(
 				data->getStreamId(),
 				data->getExchangeProductId(),
-				data->getExchangeInstId(),
+				"DEFAULT",
 				data->getOptionDictionary()->getRootSymbol(),
 				data->getOptionDictionary()->getExpirationDateYYYYMMDD(),
 				data->getOptionDictionary()->getStrike(),

@@ -74,7 +74,7 @@ public:
 	}
 
 	// Exchange stuff
-	virtual std::string getExchangeInstId() {
+	virtual int getExchangeInstId() {
 		return 0;
 	}
 
@@ -92,7 +92,7 @@ public:
 
 	}
 	virtual DictionaryUserDataPtr getOrderUserData() {
-		return DictionaryUserDataImplPtr();
+		return std::shared_ptr<DictionaryUserData>();
 	}
 
 	// May be we can have serialized Market Data packet in it if we need
@@ -130,7 +130,7 @@ public:
 	}
 
 	virtual int getExchangeInstId() {
-		return _mktDataDicOptMsg->_instrument;
+		return 0;
 	}
 	virtual int getExchangeOptionId() {
 		return _mktDataDicOptMsg->_tokenNumber;
@@ -196,7 +196,7 @@ public:
 	}
 
 	virtual std::string getExchangeInstId() {
-		return _dom->getExchangeInstId();
+		return "EMPTY";
 	}
 	virtual int getExchangeOptionId() {
 		return _dom->getExchangeOptionId();
@@ -247,7 +247,7 @@ public:
 				_exchangeId(exchId),
 				_instDict(instDic),
 				_dom(optDicMsg),
-				_doi(new DictionaryOptionImpl(exchId, instDic->getExchangeInstId(), _dom)),
+				_doi(new DictionaryOptionImpl(exchId, "DEFAULT", _dom)),
 				_userData(new DictionaryUserDataImpl()){
 	}
 
@@ -289,10 +289,10 @@ public:
 	}
 
 	virtual void setOrderUserData(const DictionaryUserDataPtr& ud ) {
-		_userData = ud;
+		//_userData = ud;
 	}
 	virtual DictionaryUserDataPtr getOrderUserData() {
-		return _userData;
+		return std::shared_ptr<DictionaryUserData>();
 	}
 
 	// May be we can have serialized Market Data packet in it if we need
@@ -301,13 +301,6 @@ public:
 	}
 	virtual std::string getExtra() {
 		return "";
-	}
-
-	virtual void setOrderuserData(const DictionaryUserDataPtr& userData){
-		_userData->setOrderuserData(userData);
-	}
-	virtual const DictionaryUserDataPtr& getOrderUserData(){
-		return _userData->getOrderUserData();
 	}
 
 	virtual void setAdaptorOrderuserData(const DictionaryUserDataPtr& userData){

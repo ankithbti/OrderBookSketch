@@ -26,7 +26,7 @@ public:
 	}
 
 	virtual void init(const std::string& config) = 0;
-	virtual IExchangeSessionPtr createSession(const std::string& sessionName, const std::string& sessionType) = 0;
+	virtual IExchangeSession::SharedPtr createSession(const std::string& sessionName, const std::string& sessionType) = 0;
 };
 using IExchangeSessionFactoryPtr = std::shared_ptr<IExchangeSessionFactory>;
 }
